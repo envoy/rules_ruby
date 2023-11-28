@@ -5,12 +5,37 @@ load(
     "rb_gem_push",
     "rb_test",
 )
+# load(
+#     "@bundle//rake:gemspec.bzl",
+#     rake_bin = "bin",
+# )
+# load(
+#     "@bundle//rspec:gemspec.bzl",
+#     rspec_bin = "bin",
+# )
 
 package(default_visibility = ["//:__subpackages__"])
 
+# rake_bin.rake(
+#     name = "rake",
+#     deps = [
+#         "//lib:gem",
+#         "@bundle",
+#     ],
+# )
+#
+# rspec_gem.rspec(
+# )
+#
+# rspec_gem.test(
+# )
+#
+# rspec_gem.code_generator(
+# )
+
 rb_binary(
     name = "rake",
-    main = "@bundle//:bin/rake",
+    main = "@bundle//bin:rake",
     deps = [
         "//lib:gem",
         "@bundle",

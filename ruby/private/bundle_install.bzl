@@ -1,10 +1,6 @@
 load(
     "//ruby/private:providers.bzl",
     "RubyFilesInfo",
-    "get_bundle_env",
-    "get_transitive_data",
-    "get_transitive_deps",
-    "get_transitive_srcs",
 )
 
 def _rb_bundle_install_impl(ctx):

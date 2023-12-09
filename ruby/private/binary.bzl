@@ -127,22 +127,20 @@ def rb_binary_impl(ctx):
         tools.extend(java_toolchain.java_runtime.files.to_list())
         java_bin = java_toolchain.java_runtime.java_executable_runfiles_path[3:]
 
-    runfiles = ctx.runfiles(transitive_srcs + transitive_data + tools)
-    runfiles = get_transitive_runfiles(runfiles, ctx.attr.srcs, ctx.attr.deps, ctx.attr.data)
-
     for dep in ctx.attr.deps:
         if BundlerInfo in dep:
             info = dep[BundlerInfo]
             env.update({"BUNDLE_GEMFILE": info.gemfile.short_path.partition("/")[-1]})
             env.update({"BUNDLE_PATH": info.vendor.short_path.partition("/")[-1]})
-            transitive_srcs.append(info.gemfile)
-            runfiles = runfiles.merge(ctx.runfiles([info.bin]))
-            runfiles = runfiles.merge(ctx.runfiles([info.vendor]))
+            transitive_srcs.extend([info.gemfile, info.bin, info.vendor])
             bundler = True
 
     bundle_env = get_bundle_env(ctx.attr.env, ctx.attr.deps)
     env.update(bundle_env)
     env.update(ctx.attr.env)
+
+    runfiles = ctx.runfiles(transitive_srcs + transitive_data + tools)
+    runfiles = get_transitive_runfiles(runfiles, ctx.attr.srcs, ctx.attr.deps, ctx.attr.data)
 
     script = generate_rb_binary_script(
         ctx,

@@ -10,8 +10,12 @@ fi
 # Set environment variables.
 export PATH={toolchain_bindir}:$PATH
 {env}
-export BUNDLE_GEMFILE=$(rlocation $BUNDLE_GEMFILE)
-export BUNDLE_PATH=$(rlocation $BUNDLE_PATH)/bundle
+
+if [ -n "{bundler_command}" ]; then
+  export BUNDLE_DEPLOYMENT=true
+  export BUNDLE_GEMFILE=$(rlocation $BUNDLE_GEMFILE)
+  export BUNDLE_PATH=$(rlocation $BUNDLE_PATH)/bundle
+fi
 
 {bundler_command} {ruby_binary_name} {binary} {args} $@
 

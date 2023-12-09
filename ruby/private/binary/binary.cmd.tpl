@@ -14,3 +14,5 @@ set PATH={toolchain_bindir};%PATH%
 {env}
 
 {bundler_command} {ruby_binary_name} {binary} {args} %*
+
+:: vim: ft=dosbatch

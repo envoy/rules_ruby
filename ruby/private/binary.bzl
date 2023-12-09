@@ -3,6 +3,7 @@
 load("//ruby/private:library.bzl", LIBRARY_ATTRS = "ATTRS")
 load(
     "//ruby/private:providers.bzl",
+    "BundlerInfo",
     "RubyFilesInfo",
     "get_bundle_env",
     "get_transitive_data",
@@ -119,17 +120,24 @@ def rb_binary_impl(ctx):
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps).to_list()
 
     ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
-    tools = [ruby_toolchain.ruby, ruby_toolchain.bundle, ruby_toolchain.gem]
+    tools = [ruby_toolchain.ruby, ruby_toolchain.bundle, ruby_toolchain.gem, ctx.file._runfiles_library]
 
     if ruby_toolchain.version.startswith("jruby"):
         java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
-        tools.extend(ctx.files._runfiles_library)
         tools.extend(java_toolchain.java_runtime.files.to_list())
         java_bin = java_toolchain.java_runtime.java_executable_runfiles_path[3:]
 
-    for dep in transitive_deps:
-        # TODO: Do not depend on workspace name to determine bundle
-        if dep.label.workspace_name.endswith("bundle"):
+    runfiles = ctx.runfiles(transitive_srcs + transitive_data + tools)
+    runfiles = get_transitive_runfiles(runfiles, ctx.attr.srcs, ctx.attr.deps, ctx.attr.data)
+
+    for dep in ctx.attr.deps:
+        if BundlerInfo in dep:
+            info = dep[BundlerInfo]
+            env.update({"BUNDLE_GEMFILE": info.gemfile.short_path.partition("/")[-1]})
+            env.update({"BUNDLE_PATH": info.vendor.short_path.partition("/")[-1]})
+            transitive_srcs.append(info.gemfile)
+            runfiles = runfiles.merge(ctx.runfiles([info.bin]))
+            runfiles = runfiles.merge(ctx.runfiles([info.vendor]))
             bundler = True
 
     bundle_env = get_bundle_env(ctx.attr.env, ctx.attr.deps)
@@ -143,9 +151,6 @@ def rb_binary_impl(ctx):
         env = env,
         java_bin = java_bin,
     )
-
-    runfiles = ctx.runfiles(transitive_srcs + transitive_data + tools)
-    runfiles = get_transitive_runfiles(runfiles, ctx.attr.srcs, ctx.attr.deps, ctx.attr.data)
 
     return [
         DefaultInfo(

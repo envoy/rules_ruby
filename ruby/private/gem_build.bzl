@@ -3,6 +3,7 @@
 load("//ruby/private:library.bzl", LIBRARY_ATTRS = "ATTRS")
 load(
     "//ruby/private:providers.bzl",
+    "BundlerInfo",
     "RubyFilesInfo",
     "get_bundle_env",
     "get_transitive_data",
@@ -18,7 +19,7 @@ def _rb_gem_build_impl(ctx):
 
     gem_builder = ctx.actions.declare_file("{}_gem_builder.rb".format(ctx.label.name))
     transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps).to_list()
-    transitive_deps = get_transitive_deps(ctx.attr.deps)
+    transitive_deps = get_transitive_deps(ctx.attr.deps).to_list()
     transitive_srcs = get_transitive_srcs(ctx.files.srcs, ctx.attr.deps).to_list()
     bundle_env = get_bundle_env({}, ctx.attr.deps)
     java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
@@ -67,14 +68,28 @@ def _rb_gem_build_impl(ctx):
         tools = tools,
     )
 
-    return [
+    providers = []
+    runfiles = ctx.runfiles(transitive_srcs + transitive_data)
+    for dep in transitive_deps:
+        if BundlerInfo in dep:
+            providers.append(dep[BundlerInfo])
+            runfiles.merge(ctx.runfiles([dep[BundlerInfo].gemfile, dep[BundlerInfo].vendor]))
+            break
+
+    providers.extend([
+        DefaultInfo(
+            files = depset([ctx.outputs.gem]),
+            runfiles = runfiles,
+        ),
         RubyFilesInfo(
             transitive_data = depset(transitive_data),
-            transitive_deps = transitive_deps,
+            transitive_deps = depset(transitive_deps),
             transitive_srcs = depset(transitive_srcs),
             bundle_env = bundle_env,
         ),
-    ]
+    ])
+
+    return providers
 
 rb_gem_build = rule(
     _rb_gem_build_impl,

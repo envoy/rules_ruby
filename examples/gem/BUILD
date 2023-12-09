@@ -10,7 +10,7 @@ package(default_visibility = ["//:__subpackages__"])
 
 rb_binary(
     name = "rake",
-    main = "@bundle//:bin/rake",
+    main = "@bundle//bin:rake",
     deps = [
         "//lib:gem",
         "@bundle",
@@ -22,7 +22,7 @@ rb_test(
     size = "small",
     timeout = "moderate",  # JRuby startup can be slow
     data = [".rubocop.yml"],
-    main = "@bundle//:bin/rubocop",
+    main = "@bundle//bin:rubocop",
     tags = ["no-sandbox"],
     deps = [
         "//lib:gem",

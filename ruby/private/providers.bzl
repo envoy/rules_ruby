@@ -4,6 +4,10 @@ RubyFilesInfo = provider(
     fields = ["transitive_data", "transitive_deps", "transitive_srcs", "bundle_env"],
 )
 
+BundlerInfo = provider(
+    fields = ["bin", "gemfile", "vendor"],
+)
+
 # https://bazel.build/rules/depsets
 
 def get_transitive_srcs(srcs, deps):

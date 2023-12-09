@@ -9,3 +9,5 @@ rb_library(
     data = glob(["**/*"]),
     bundle_env = BUNDLE_ENV,
 )
+
+# vim: ft=bzl

@@ -73,67 +73,15 @@ def _rb_bundle_install_impl(ctx):
     )
 
     binstubs = ctx.actions.declare_directory("bin")
-    # bundle_config = ctx.actions.declare_file(".bundle/config")
-    # ctx.actions.expand_template(
-    #     template = ctx.file._bundle_config_tpl,
-    #     output = bundle_config,
-    #     substitutions = {
-    #         "{binstubs_path}": binstubs.path,
-    #         "{bundle_path}": vendor.path + "/bundle",
-    #         "{cache_path}": vendor.path + "/cache",
-    #         "{gemfile_path}": ctx.file.gemfile.path,
-    #         "{ruby_path}": toolchain.ruby.path,
-    #     },
-    # )
-
-    # build = ctx.actions.declare_file("BUILD")
-    # ctx.actions.run(
-    #     inputs = depset([vendor]),
-    #     executable = toolchain.ruby,
-    #     arguments = [
-    #         "-e",
-    #         "File.write('%s', 'exports_files(glob([\"bin/*\"]))')" % build.path,
-    #     ],
-    #     outputs = [build],
-    # )
-
-    # args = ctx.actions.args()
-    # args.add("install")
-    # args.add("--local")
-    # args.add("--no-cache")
-    # ctx.actions.run(
-    #     inputs = depset([vendor, build, ctx.file.gemfile, ctx.file.gemfile_lock] + ctx.files.srcs),
-    #     executable = toolchain.bundle,
-    #     arguments = [args],
-    #     outputs = [binstubs],
-    #     use_default_shell_env = False,
-    #     env = {
-    #         # "BUNDLE_APP_CONFIG": bundle_config.dirname,
-    #         "BUNDLE_BIN": "../../" + binstubs.path,
-    #         "BUNDLE_CACHE_PATH": "../../" + vendor.path + "/cache",
-    #         "BUNDLE_DEPLOYMENT": "true",
-    #         "BUNDLE_GEMFILE": ctx.file.gemfile.path,
-    #         "BUNDLE_PATH": "../../" + vendor.path + "/bundle",
-    #         "BUNDLE_SHEBANG": toolchain.ruby.path,
-    #     },
-    #     tools = [toolchain.ruby, toolchain.bundle],
-    # )
-
-    bundle_install = ctx.actions.declare_file("bundle_install.sh")
-    ctx.actions.expand_template(
-        template = ctx.file._bundle_install_tpl,
-        output = bundle_install,
-        substitutions = {
-            "{build_path}": binstubs.path + "/BUILD",
-            # "{config_path}": bundle_config.dirname,
-        },
-    )
+    args = ctx.actions.args()
+    args.add("install")
+    args.add("--local")
+    args.add("--no-cache")
     ctx.actions.run(
         inputs = depset([vendor, ctx.file.gemfile, ctx.file.gemfile_lock] + ctx.files.srcs),
-        executable = bundle_install,
-        # arguments = [args],
+        executable = toolchain.bundle,
+        arguments = [args],
         outputs = [binstubs],
-        # use_default_shell_env = False,
         env = {
             "BUNDLE_BIN": "../../" + binstubs.path,
             "BUNDLE_CACHE_PATH": "../../" + vendor.path + "/cache",
@@ -180,14 +128,6 @@ rb_bundle_install = rule(
         "gems": attr.label_list(
             allow_files = True,
             doc = "List of runtime dependencies needed by a program that depends on this library.",
-        ),
-        "_bundle_config_tpl": attr.label(
-            allow_single_file = True,
-            default = "@rules_ruby//ruby/private:bundle_install/bundle_config.tpl",
-        ),
-        "_bundle_install_tpl": attr.label(
-            allow_single_file = True,
-            default = "@rules_ruby//ruby/private:bundle_install/bundle_install.sh.tpl",
         ),
         "_prepare_bundle_path_tpl": attr.label(
             allow_single_file = True,

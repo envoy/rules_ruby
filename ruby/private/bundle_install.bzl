@@ -1,4 +1,4 @@
-load("//ruby/private:providers.bzl", "BundlerInfo", "RubyFilesInfo")
+load("//ruby/private:providers.bzl", "BundlerInfo", "GemInfo", "RubyFilesInfo")
 
 def _rb_bundle_install_impl(ctx):
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
@@ -23,6 +23,15 @@ def _rb_bundle_install_impl(ctx):
         outputs = [vendor],
     )
 
+    tools = [toolchain.ruby, toolchain.bundle]
+    bundler = toolchain.bundle
+    gem_path = ""
+    for gem in ctx.attr.gems:
+        if gem[GemInfo].name == "bundler":
+            bundler = gem.files.to_list()[-1].path + "/bin/bundle"
+            gem_path = gem.files.to_list()[-1].path
+            tools.extend(gem.files.to_list())
+
     binstubs = ctx.actions.declare_directory("bin")
     args = ctx.actions.args()
     args.add("install")
@@ -30,7 +39,7 @@ def _rb_bundle_install_impl(ctx):
     args.add("--no-cache")
     ctx.actions.run(
         inputs = depset([vendor, ctx.file.gemfile, ctx.file.gemfile_lock] + ctx.files.srcs),
-        executable = toolchain.bundle,
+        executable = bundler,
         arguments = [args],
         outputs = [binstubs],
         env = {
@@ -41,8 +50,10 @@ def _rb_bundle_install_impl(ctx):
             "BUNDLE_GEMFILE": ctx.file.gemfile.path,
             "BUNDLE_PATH": "../../" + vendor.path + "/bundle",
             "BUNDLE_SHEBANG": toolchain.ruby.short_path,
+            "BUNDLE_STANDALONE": "true",
+            "GEM_PATH": gem_path,
         },
-        tools = [toolchain.ruby, toolchain.bundle],
+        tools = tools,
     )
 
     return [

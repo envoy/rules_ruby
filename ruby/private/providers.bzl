@@ -8,6 +8,10 @@ BundlerInfo = provider(
     fields = ["bin", "gemfile", "vendor"],
 )
 
+GemInfo = provider(
+    fields = ["name", "version"],
+)
+
 # https://bazel.build/rules/depsets
 
 def get_transitive_srcs(srcs, deps):

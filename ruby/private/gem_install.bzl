@@ -1,3 +1,5 @@
+load("//ruby/private:providers.bzl", "GemInfo")
+
 def _rb_gem_install_impl(ctx):
     gem = ctx.file.gem
     install_dir = ctx.actions.declare_directory(gem.basename[:-4])
@@ -10,7 +12,7 @@ def _rb_gem_install_impl(ctx):
     args.add("--bindir")
     args.add(install_dir.path + "/bin")
     args.add("--wrappers")
-    args.add("--env-shebang")
+    args.add("--no-env-shebang")
     args.add("--ignore-dependencies")
     args.add("--no-document")
     args.add("--local")
@@ -27,6 +29,10 @@ def _rb_gem_install_impl(ctx):
     return [
         DefaultInfo(
             files = depset([gem, install_dir]),
+        ),
+        GemInfo(
+            name = ctx.attr.name.rpartition("-")[0],
+            version = ctx.attr.name.rpartition("-")[-1],
         ),
     ]
 

@@ -100,7 +100,7 @@ def parse_gemfile_lock(content):
 
     remote_packages = []
     git_packages = []
-    bundler_version = None
+    bundler = None
 
     inside_gem = False
     inside_git = False
@@ -142,11 +142,18 @@ def parse_gemfile_lock(content):
 
         # Only parse bundler version from the BUNDLED_WITH section.
         if inside_bundled_with:
-            bundler_version = line.strip()
+            version = line.strip()
+            bundler = struct(
+                name = "bundler",
+                version = version,
+                filename = "bundler-%s.gem" % version,
+                full_name = "bundler-%s" % version,
+                remote = "https://rubygems.org/",
+            )
             inside_bundled_with = False
 
     return struct(
-        remote_packages = remote_packages,
+        bundler = bundler,
         git_packages = git_packages,
-        bundler_version = bundler_version,
+        remote_packages = remote_packages,
     )

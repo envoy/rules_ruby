@@ -34,6 +34,10 @@ def _cleanup_downloads(repository_ctx, gem):
     repository_ctx.delete(gem.full_name)
     repository_ctx.delete(gem.filename + ".tar")
 
+
+def _join_and_indent(names):
+    return "[\n        " + "\n        ".join(['"%s",' % name for name in names]) + "\n    ]"
+
 def _rb_bundle_fetch_impl(repository_ctx):
     gemfile_path = repository_ctx.path(repository_ctx.attr.gemfile)
     gemfile_lock_path = repository_ctx.path(repository_ctx.attr.gemfile_lock)
@@ -54,11 +58,11 @@ def _rb_bundle_fetch_impl(repository_ctx):
         executables.extend(_get_gem_executables(repository_ctx, gem))
         _cleanup_downloads(repository_ctx, gem)
 
+    gem_full_names = []
     gem_installs = []
-    gem_names = []
     for gem in gems:
+        gem_full_names.append(":%s" % gem.full_name)
         gem_installs.append(_GEM_INSTALL_BUILD_FRAGMENT.format(name = gem.full_name, gem = gem.filename))
-        gem_names.append('":%s",' % gem.full_name)
 
     repository_ctx.template(
         "BUILD",
@@ -66,8 +70,8 @@ def _rb_bundle_fetch_impl(repository_ctx):
         executable = False,
         substitutions = {
             "{name}": repository_ctx.name,
-            "{srcs}": "\n        ".join(['"%s",' % src for src in srcs]),
-            "{gems}": "\n        ".join(gem_names),
+            "{srcs}": _join_and_indent(srcs),
+            "{gems}": _join_and_indent(gem_full_names),
             "{gem_installs}": "".join(gem_installs),
         },
     )

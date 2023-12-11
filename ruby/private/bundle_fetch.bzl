@@ -12,10 +12,10 @@ rb_gem_install(
 def _download_gem(repository_ctx, gem):
     url = "{remote}gems/{filename}".format(remote = gem.remote, filename = gem.filename)
     repository_ctx.download(url = url, output = gem.filename)
-    repository_ctx.download(url = url, output = gem.filename + ".tar")
 
 def _get_gem_executables(repository_ctx, gem):
     executables = []
+    repository_ctx.symlink(gem.filename, gem.filename + ".tar")
     repository_ctx.extract(gem.filename + ".tar", output = gem.full_name)
     data = "/".join([gem.full_name, "data"])
     repository_ctx.extract("/".join([gem.full_name, "data.tar.gz"]), output = data)
@@ -28,6 +28,7 @@ def _get_gem_executables(repository_ctx, gem):
             for executable in gem_contents.get_child(executable_dirname).readdir():
                 executables.append(executable.basename)
 
+    _cleanup_downloads(repository_ctx, gem)
     return executables
 
 def _cleanup_downloads(repository_ctx, gem):
@@ -55,7 +56,6 @@ def _rb_bundle_fetch_impl(repository_ctx):
         gems.append(gem)
         _download_gem(repository_ctx, gem)
         executables.extend(_get_gem_executables(repository_ctx, gem))
-        _cleanup_downloads(repository_ctx, gem)
 
     gem_full_names = []
     gem_installs = []

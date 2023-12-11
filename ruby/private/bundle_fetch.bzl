@@ -66,7 +66,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
         executable = False,
         substitutions = {
             "{name}": repository_ctx.name,
-            "{srcs}": repr(srcs),
+            "{srcs}": "\n        ".join(['"%s",' % src for src in srcs]),
             "{gems}": "\n        ".join(gem_names),
             "{gem_installs}": "".join(gem_installs),
         },
@@ -104,10 +104,6 @@ rb_bundle_fetch = repository_rule(
         "_build_tpl": attr.label(
             allow_single_file = True,
             default = "@rules_ruby//:ruby/private/bundle_fetch/BUILD.tpl",
-        ),
-        "_build_gem_install_tpl": attr.label(
-            allow_single_file = True,
-            default = "@rules_ruby//:ruby/private/bundle_fetch/BUILD.gem_install.tpl",
         ),
         "_bin_build_tpl": attr.label(
             allow_single_file = True,

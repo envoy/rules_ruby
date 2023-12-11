@@ -37,6 +37,7 @@ def _rb_bundle_install_impl(ctx):
             "BUNDLE_BIN": "../../" + binstubs.path,
             "BUNDLE_CACHE_PATH": "../../" + vendor.path + "/cache",
             "BUNDLE_DEPLOYMENT": "true",
+            "BUNDLE_DISABLE_SHARED_GEMS": "true",
             "BUNDLE_GEMFILE": ctx.file.gemfile.path,
             "BUNDLE_PATH": "../../" + vendor.path + "/bundle",
             "BUNDLE_SHEBANG": toolchain.ruby.short_path,

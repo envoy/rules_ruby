@@ -34,7 +34,6 @@ def _cleanup_downloads(repository_ctx, gem):
     repository_ctx.delete(gem.full_name)
     repository_ctx.delete(gem.filename + ".tar")
 
-
 def _join_and_indent(names):
     return "[\n        " + "\n        ".join(['"%s",' % name for name in names]) + "\n    ]"
 

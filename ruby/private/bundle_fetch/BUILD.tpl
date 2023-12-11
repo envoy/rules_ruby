@@ -9,15 +9,9 @@ rb_bundle_install(
     srcs = {srcs},
     gemfile = "Gemfile",
     gemfile_lock = "Gemfile.lock",
-    gems = {gems},
+    gems = [
+        {gems}
+    ]
 )
 
-[
-    rb_gem_install(
-        name = gem[:-4],
-        gem = gem,
-    )
-    for gem in glob(["*.gem"])
-]
-
-# vim: ft=bzl
+{gem_installs}

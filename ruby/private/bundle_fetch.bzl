@@ -2,6 +2,13 @@
 
 load("//ruby/private/bundle_fetch:gemfile_lock_parser.bzl", "parse_gemfile_lock")
 
+_GEM_INSTALL_BUILD_FRAGMENT = """
+rb_gem_install(
+    name = "{name}",
+    gem = "{gem}",
+)
+"""
+
 def _download_gem(repository_ctx, gem):
     url = "{remote}gems/{filename}".format(remote = gem.remote, filename = gem.filename)
     repository_ctx.download(url = url, output = gem.filename)
@@ -42,10 +49,16 @@ def _rb_bundle_fetch_impl(repository_ctx):
     gems = []
     gemfile_lock = parse_gemfile_lock(repository_ctx.read(gemfile_lock_path))
     for gem in gemfile_lock.remote_packages:
-        gems.append(gem.full_name)
+        gems.append(gem)
         _download_gem(repository_ctx, gem)
         executables.extend(_get_gem_executables(repository_ctx, gem))
         _cleanup_downloads(repository_ctx, gem)
+
+    gem_installs = []
+    gem_names = []
+    for gem in gems:
+        gem_installs.append(_GEM_INSTALL_BUILD_FRAGMENT.format(name = gem.full_name, gem = gem.filename))
+        gem_names.append('":%s",' % gem.full_name)
 
     repository_ctx.template(
         "BUILD",
@@ -54,7 +67,8 @@ def _rb_bundle_fetch_impl(repository_ctx):
         substitutions = {
             "{name}": repository_ctx.name,
             "{srcs}": repr(srcs),
-            "{gems}": repr(gems),
+            "{gems}": "\n        ".join(gem_names),
+            "{gem_installs}": "".join(gem_installs),
         },
     )
 
@@ -90,6 +104,10 @@ rb_bundle_fetch = repository_rule(
         "_build_tpl": attr.label(
             allow_single_file = True,
             default = "@rules_ruby//:ruby/private/bundle_fetch/BUILD.tpl",
+        ),
+        "_build_gem_install_tpl": attr.label(
+            allow_single_file = True,
+            default = "@rules_ruby//:ruby/private/bundle_fetch/BUILD.gem_install.tpl",
         ),
         "_bin_build_tpl": attr.label(
             allow_single_file = True,

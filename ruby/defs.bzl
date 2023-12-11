@@ -10,8 +10,8 @@ load("//ruby/private:test.bzl", _rb_test = "rb_test")
 
 rb_binary = _rb_binary
 rb_bundle_install = _rb_bundle_install
-rb_gem_install = _rb_gem_install
 rb_gem_build = _rb_gem_build
+rb_gem_install = _rb_gem_install
 rb_gem_push = _rb_gem_push
 rb_library = _rb_library
 rb_test = _rb_test

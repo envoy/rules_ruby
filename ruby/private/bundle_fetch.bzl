@@ -1,6 +1,31 @@
 "Implementation details for fetch the bundler"
 
-load("//ruby/private/bundle:gemfile_lock_parser.bzl", "parse_gemfile_lock")
+load("//ruby/private/bundle_fetch:gemfile_lock_parser.bzl", "parse_gemfile_lock")
+
+def _download_gem(repository_ctx, gem):
+    url = "{remote}gems/{filename}".format(remote = gem.remote, filename = gem.filename)
+    repository_ctx.download(url = url, output = gem.filename)
+    repository_ctx.download(url = url, output = gem.filename + ".tar")
+
+def _get_gem_executables(repository_ctx, gem):
+    executables = []
+    repository_ctx.extract(gem.filename + ".tar", output = gem.full_name)
+    data = "/".join([gem.full_name, "data"])
+    repository_ctx.extract("/".join([gem.full_name, "data.tar.gz"]), output = data)
+    gem_contents = repository_ctx.path(data)
+
+    # TODO: get executables from metadata.gz
+    executable_dirnames = ["bin", "exe"]
+    for executable_dirname in executable_dirnames:
+        if gem_contents.get_child(executable_dirname).exists:
+            for executable in gem_contents.get_child(executable_dirname).readdir():
+                executables.append(executable.basename)
+
+    return executables
+
+def _cleanup_downloads(repository_ctx, gem):
+    repository_ctx.delete(gem.full_name)
+    repository_ctx.delete(gem.filename + ".tar")
 
 def _rb_bundle_fetch_impl(repository_ctx):
     gemfile_path = repository_ctx.path(repository_ctx.attr.gemfile)
@@ -13,14 +38,14 @@ def _rb_bundle_fetch_impl(repository_ctx):
         srcs.append(src.name)
         repository_ctx.file(src.name, repository_ctx.read(src))
 
+    executables = []
     gems = []
     gemfile_lock = parse_gemfile_lock(repository_ctx.read(gemfile_lock_path))
     for gem in gemfile_lock.remote_packages:
-        gems.append("%s-%s" % (gem.name, gem.version))
-        repository_ctx.download(
-            url = "https://rubygems.org/gems/{filename}".format(filename = gem.filename),
-            output = gem.filename,
-        )
+        gems.append(gem.full_name)
+        _download_gem(repository_ctx, gem)
+        executables.extend(_get_gem_executables(repository_ctx, gem))
+        _cleanup_downloads(repository_ctx, gem)
 
     repository_ctx.template(
         "BUILD",
@@ -33,86 +58,23 @@ def _rb_bundle_fetch_impl(repository_ctx):
         },
     )
 
-    repository_ctx.file(
+    repository_ctx.template(
         "bin/BUILD",
-        """
-load("@rules_ruby//ruby:defs.bzl", "rb_library")
-
-package(default_visibility = ["//visibility:public"])
-
-rb_library(
-    name = "bin",
-    data = glob(["*"]),
-    deps = ["//:bundle"],
-)
-        """,
+        repository_ctx.attr._bin_build_tpl,
+        executable = False,
+        substitutions = {
+            "{name}": repository_ctx.name,
+        },
     )
-
-    repository_ctx.file("bin/rake")
-    repository_ctx.file("bin/rspec")
-    repository_ctx.file("bin/rubocop")
-
-    # binstubs_path = repository_ctx.path("bin")
-    # bundle_path = repository_ctx.path(".")
-    # gemfile_path = repository_ctx.path(repository_ctx.attr.gemfile)
-    # toolchain_path = repository_ctx.path(repository_ctx.attr.toolchain).dirname
-    #
-    # if repository_ctx.os.name.startswith("windows"):
-    #     bundle = repository_ctx.path("%s/dist/bin/bundle.cmd" % toolchain_path)
-    #     path_separator = ";"
-    #     if repository_ctx.path("%s/dist/bin/jruby.exe" % toolchain_path).exists:
-    #         ruby = repository_ctx.path("%s/dist/bin/jruby.exe" % toolchain_path)
-    #     else:
-    #         ruby = repository_ctx.path("%s/dist/bin/ruby.exe" % toolchain_path)
-    # else:
-    #     bundle = repository_ctx.path("%s/dist/bin/bundle" % toolchain_path)
-    #     path_separator = ":"
-    #     if repository_ctx.path("%s/dist/bin/jruby" % toolchain_path).exists:
-    #         ruby = repository_ctx.path("%s/dist/bin/jruby" % toolchain_path)
-    #     else:
-    #         ruby = repository_ctx.path("%s/dist/bin/ruby" % toolchain_path)
-    #
-    # repository_ctx.template(
-    #     "BUILD",
-    #     repository_ctx.attr._build_tpl,
-    #     executable = False,
-    # )
-    #
-    # env = {
-    #     "BUNDLE_BIN": repr(binstubs_path),
-    #     "BUNDLE_GEMFILE": repr(gemfile_path),
-    #     "BUNDLE_IGNORE_CONFIG": "1",
-    #     "BUNDLE_PATH": repr(bundle_path),
-    #     "BUNDLE_SHEBANG": repr(ruby),
-    #     "PATH": path_separator.join([repr(ruby.dirname), repository_ctx.os.environ["PATH"]]),
-    # }
-    # env.update(repository_ctx.attr.env)
-    #
-    # bundle_env = {k: v for k, v in env.items() if k.startswith("BUNDLE_")}
-    # repository_ctx.file(
-    #     "defs.bzl",
-    #     "BUNDLE_ENV = %s" % bundle_env,
-    # )
-    #
-    # repository_ctx.report_progress("Running bundle install")
-    # result = repository_ctx.execute(
-    #     [bundle, "install"],
-    #     environment = env,
-    #     working_directory = repr(gemfile_path.dirname),
-    #     quiet = not repository_ctx.os.environ.get("RUBY_RULES_DEBUG", default = False),
-    # )
-    #
-    # if result.return_code != 0:
-    #     fail("%s\n%s" % (result.stdout, result.stderr))
+    for executable in executables:
+        repository_ctx.file("/".join(["bin", executable]))
 
 rb_bundle_fetch = repository_rule(
     implementation = _rb_bundle_fetch_impl,
     attrs = {
         "srcs": attr.label_list(
             allow_files = True,
-            doc = """
-List of Ruby source files used to build the library.
-            """,
+            doc = "List of Ruby source files used to build the library.",
         ),
         "gemfile": attr.label(
             allow_single_file = ["Gemfile"],
@@ -128,6 +90,10 @@ List of Ruby source files used to build the library.
         "_build_tpl": attr.label(
             allow_single_file = True,
             default = "@rules_ruby//:ruby/private/bundle_fetch/BUILD.tpl",
+        ),
+        "_bin_build_tpl": attr.label(
+            allow_single_file = True,
+            default = "@rules_ruby//:ruby/private/bundle_fetch/bin/BUILD.tpl",
         ),
     },
 )

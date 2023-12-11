@@ -45,6 +45,9 @@ def _parse_package(line):
         name = package,
         version = version,
         filename = "%s-%s.gem" % (package, version),
+        full_name = "%s-%s" % (package, version),
+        # TODO: support getting remote from lockfile
+        remote = "https://rubygems.org/",
     )
 
 def _parse_top_section(line):

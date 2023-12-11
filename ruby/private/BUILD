@@ -67,7 +67,17 @@ bzl_library(
     name = "bundle_fetch",
     srcs = ["bundle_fetch.bzl"],
     visibility = ["//ruby:__subpackages__"],
-    deps = ["//ruby/private/bundle:gemfile_lock_parser"],
+    deps = ["//ruby/private/bundle_fetch:gemfile_lock_parser"],
+)
+
+bzl_library(
+    name = "bundle_install",
+    srcs = ["bundle_install.bzl"],
+    visibility = ["//ruby:__subpackages__"],
+    deps = [
+        ":gem_install",
+        ":providers",
+    ],
 )
 
 bzl_library(
@@ -77,14 +87,14 @@ bzl_library(
 )
 
 bzl_library(
-    name = "bundle_install",
-    srcs = ["bundle_install.bzl"],
+    name = "download",
+    srcs = ["download.bzl"],
     visibility = ["//ruby:__subpackages__"],
 )
 
 bzl_library(
-    name = "download",
-    srcs = ["download.bzl"],
+    name = "gem_install",
+    srcs = ["gem_install.bzl"],
     visibility = ["//ruby:__subpackages__"],
 )
 

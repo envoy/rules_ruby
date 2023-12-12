@@ -12,19 +12,17 @@ ruby.toolchain(
     name = "rules_ruby",
     version_file = "//:.ruby-version",
 )
-use_repo(ruby, "rules_ruby_dist")
-ruby.bundle(
+ruby.bundle_fetch(
     name = "bundle",
     srcs = [
-        "//:Gemfile.lock",
         "//:gem.gemspec",
         "//:lib/gem/version.rb",
     ],
-    env = {
-        "BUNDLE_BUILD__FOO": "bar",
-    },
+    # env = {
+    #     "BUNDLE_BUILD__FOO": "bar",
+    # },
     gemfile = "//:Gemfile",
-    toolchain = "@rules_ruby_dist//:BUILD",
+    gemfile_lock = "//:Gemfile.lock",
 )
 use_repo(ruby, "bundle", "rules_ruby_toolchains")
 

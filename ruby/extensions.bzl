@@ -1,7 +1,7 @@
 "Module extensions used by bzlmod"
 
 load("//ruby/private:toolchain.bzl", "DEFAULT_RUBY_REPOSITORY")
-load(":deps.bzl", "rb_bundle", "rb_register_toolchains")
+load(":deps.bzl", "rb_bundle", "rb_bundle_fetch", "rb_register_toolchains")
 
 ruby_bundle = tag_class(attrs = {
     "name": attr.string(doc = "Resulting repository name for the bundle"),
@@ -9,6 +9,14 @@ ruby_bundle = tag_class(attrs = {
     "env": attr.string_dict(),
     "gemfile": attr.label(),
     "toolchain": attr.label(),
+})
+
+ruby_bundle_fetch = tag_class(attrs = {
+    "name": attr.string(doc = "Resulting repository name for the bundle"),
+    "srcs": attr.label_list(),
+    # "env": attr.string_dict(),
+    "gemfile": attr.label(),
+    "gemfile_lock": attr.label(),
 })
 
 ruby_toolchain = tag_class(attrs = {
@@ -27,6 +35,15 @@ def _ruby_module_extension(module_ctx):
                 env = bundle.env,
                 gemfile = bundle.gemfile,
                 toolchain = bundle.toolchain,
+            )
+
+        for bundle_fetch in mod.tags.bundle_fetch:
+            rb_bundle_fetch(
+                name = bundle_fetch.name,
+                srcs = bundle_fetch.srcs,
+                # env = bundle_fetch.env,
+                gemfile = bundle_fetch.gemfile,
+                gemfile_lock = bundle_fetch.gemfile_lock,
             )
 
         for toolchain in mod.tags.toolchain:
@@ -59,6 +76,7 @@ ruby = module_extension(
     implementation = _ruby_module_extension,
     tag_classes = {
         "bundle": ruby_bundle,
+        "bundle_fetch": ruby_bundle_fetch,
         "toolchain": ruby_toolchain,
     },
 )

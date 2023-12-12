@@ -68,7 +68,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
         repository_ctx.attr._build_tpl,
         executable = False,
         substitutions = {
-            "{name}": repository_ctx.name,
+            "{name}": repository_ctx.name.rpartition("~")[-1],
             "{srcs}": _join_and_indent(srcs),
             "{gems}": _join_and_indent(gem_full_names),
             "{gem_installs}": "".join(gem_installs),
@@ -80,7 +80,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
         repository_ctx.attr._bin_build_tpl,
         executable = False,
         substitutions = {
-            "{name}": repository_ctx.name,
+            "{name}": repository_ctx.name.rpartition("~")[-1],
         },
     )
     for executable in executables:

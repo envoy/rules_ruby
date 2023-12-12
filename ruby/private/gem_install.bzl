@@ -24,7 +24,9 @@ def _rb_gem_install_impl(ctx):
         executable = ctx.toolchains["@rules_ruby//ruby:toolchain_type"].gem,
         arguments = [args],
         outputs = [install_dir],
-        use_default_shell_env = True,
+        env = {
+            "PATH": ctx.toolchains["@rules_ruby//ruby:toolchain_type"].bindir,
+        },
     )
 
     return [

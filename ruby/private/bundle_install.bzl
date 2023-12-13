@@ -46,6 +46,7 @@ def _rb_bundle_install_impl(ctx):
         arguments = [args],
         outputs = [binstubs, bpath],
         execution_requirements = {
+            "no-sandbox": "true",
             "requires-network": "true",
         },
         env = {
@@ -60,7 +61,8 @@ def _rb_bundle_install_impl(ctx):
             "BUNDLE_PATH": "../../" + bpath.path,
             "BUNDLE_SHEBANG": toolchain.ruby.short_path,
             # "BUNDLE_STANDALONE": "true",
-            "GEM_PATH": gem_path,
+            # "GEM_PATH": gem_path,
+            # "PATH": toolchain.bindir,
         },
         tools = tools,
     )

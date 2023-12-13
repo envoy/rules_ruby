@@ -24,44 +24,39 @@ def _rb_bundle_install_impl(ctx):
     )
 
     tools = [toolchain.ruby, toolchain.bundle]
-    bundler = toolchain.bundle
-    gem_path = ""
-    # for gem in ctx.attr.gems:
-    # if gem[GemInfo].name == "bundler":
-    # bundler = gem.files.to_list()[-1].path + "/bin/bundle"
-    # gem_path = gem.files.to_list()[-1].path
-    # tools.extend(gem.files.to_list())
+    bundler_path = toolchain.bundle.path
+    gem_path = "123"
+    for gem in ctx.attr.gems:
+        if gem[GemInfo].name == "bundler":
+            bundler_path = gem.files.to_list()[-1].path + "/bin/bundle"
+            gem_path = gem.files.to_list()[-1].path
+            tools.extend(gem.files.to_list())
 
     binstubs = ctx.actions.declare_directory("bin")
     bpath = ctx.actions.declare_directory("vendor/bundle")
-    args = ctx.actions.args()
-    args.add("install")
-
-    # args.add("--local")
-    args.add("--no-cache")
+    home = ctx.actions.declare_directory("home")
+    script = ctx.actions.declare_file("bundle_install.sh")
+    ctx.actions.expand_template(
+        template = ctx.file._bundle_install_tpl,
+        output = script,
+        substitutions = {
+            "{binstubs_path}": "../../" + binstubs.path,
+            "{gemfile_path}": ctx.file.gemfile.path,
+            "{bundle_path}": "../../" + bpath.path,
+            "{home_path}": "../../" + home.path,
+            "{bundler_path}": bundler_path,
+            "{ruby_path}": toolchain.ruby.short_path,
+            "{gem_path}": gem_path,
+            "{path}": toolchain.bindir,
+        },
+    )
 
     ctx.actions.run(
         inputs = depset([cache, ctx.file.gemfile, ctx.file.gemfile_lock] + ctx.files.srcs),
-        executable = bundler,
-        arguments = [args],
-        outputs = [binstubs, bpath],
+        executable = script,
+        outputs = [binstubs, bpath, home],
         execution_requirements = {
-            "no-sandbox": "true",
             "requires-network": "true",
-        },
-        env = {
-            "BUNDLE_ALLOW_OFFLINE_INSTALL": "true",
-            "BUNDLE_BIN": "../../" + binstubs.path,
-            # "BUNDLE_CACHE_PATH": "../../" + vendor.path + "/cache",
-            # "BUNDLE_CACHE_ALL_PLATFORMS": "true",
-            "BUNDLE_DEPLOYMENT": "true",
-            "BUNDLE_FROZEN": "true",
-            "BUNDLE_DISABLE_SHARED_GEMS": "true",
-            "BUNDLE_GEMFILE": ctx.file.gemfile.path,
-            "BUNDLE_PATH": "../../" + bpath.path,
-            "BUNDLE_SHEBANG": toolchain.ruby.short_path,
-            # "BUNDLE_STANDALONE": "true",
-            # "GEM_PATH": gem_path,
         },
         use_default_shell_env = True,
         tools = tools,
@@ -69,12 +64,19 @@ def _rb_bundle_install_impl(ctx):
 
     return [
         DefaultInfo(
-            files = depset([ctx.file.gemfile, ctx.file.gemfile_lock, binstubs] + ctx.files.srcs),
+            files = depset([
+                ctx.file.gemfile,
+                ctx.file.gemfile_lock,
+                binstubs,
+                home,
+                cache,
+                bpath,
+            ] + ctx.files.srcs),
         ),
         RubyFilesInfo(
             transitive_srcs = depset([ctx.file.gemfile, ctx.file.gemfile_lock] + ctx.files.srcs),
             transitive_deps = depset(),
-            transitive_data = depset([]),
+            transitive_data = depset([home]),
             bundle_env = {},
         ),
         BundlerInfo(
@@ -104,6 +106,10 @@ rb_bundle_install = rule(
         "gems": attr.label_list(
             allow_files = True,
             doc = "List of runtime dependencies needed by a program that depends on this library.",
+        ),
+        "_bundle_install_tpl": attr.label(
+            allow_single_file = True,
+            default = "@rules_ruby//ruby/private:bundle_install/bundle_install.sh.tpl",
         ),
         "_prepare_bundle_path_tpl": attr.label(
             allow_single_file = True,

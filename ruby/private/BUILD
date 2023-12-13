@@ -1,6 +1,7 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
 exports_files([
+    "bundle_install/bundle_install.sh.tpl",
     "bundle_install/prepare_bundle_path.rb.tpl",
     "gem_build/gem_builder.rb.tpl",
     "gem_install/gem_install.sh.tpl",

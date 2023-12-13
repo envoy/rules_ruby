@@ -33,9 +33,9 @@ stardoc_repositories()
 
 http_archive(
     name = "aspect_bazel_lib",
-    sha256 = "4b32cf6feab38b887941db022020eea5a49b848e11e3d6d4d18433594951717a",
-    strip_prefix = "bazel-lib-2.0.1",
-    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.0.1/bazel-lib-v2.0.1.tar.gz",
+    sha256 = "c858cc637db5370f6fd752478d1153955b4b4cbec7ffe95eb4a47a48499a79c3",
+    strip_prefix = "bazel-lib-2.0.3",
+    url = "https://github.com/aspect-build/bazel-lib/releases/download/v2.0.3/bazel-lib-v2.0.3.tar.gz",
 )
 
 http_archive(
@@ -77,10 +77,10 @@ gazelle_dependencies()
 # Buildifier, used in CI to verify BUILD/.bzl files are formatted and linted
 http_archive(
     name = "buildifier_prebuilt",
-    sha256 = "72b5bb0853aac597cce6482ee6c62513318e7f2c0050bc7c319d75d03d8a3875",
-    strip_prefix = "buildifier-prebuilt-6.3.3",
+    sha256 = "8ada9d88e51ebf5a1fdff37d75ed41d51f5e677cdbeafb0a22dda54747d6e07e",
+    strip_prefix = "buildifier-prebuilt-6.4.0",
     urls = [
-        "http://github.com/keith/buildifier-prebuilt/archive/6.3.3.tar.gz",
+        "http://github.com/keith/buildifier-prebuilt/archive/6.4.0.tar.gz",
     ],
 )
 

@@ -4,7 +4,7 @@ load("//ruby/private:bundle.bzl", _rb_bundle = "rb_bundle")
 load("//ruby/private:bundle_fetch.bzl", _rb_bundle_fetch = "rb_bundle_fetch")
 load("//ruby/private:toolchain.bzl", _rb_register_toolchains = "rb_register_toolchains")
 
-def rb_bundle(toolchain = "@rules_ruby_dist//:BUILD", **kwargs):
+def rb_bundle(toolchain = "@ruby//:BUILD", **kwargs):
     """
     Wraps `rb_bundle_rule()` providing default toolchain name.
 

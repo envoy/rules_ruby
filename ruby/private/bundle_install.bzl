@@ -1,4 +1,4 @@
-load("//ruby/private:providers.bzl", "BundlerInfo", "GemInfo", "RubyFilesInfo")
+load("//ruby/private:providers.bzl", "BundlerInfo", "RubyFilesInfo")
 
 def _rb_bundle_install_impl(ctx):
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
@@ -26,11 +26,11 @@ def _rb_bundle_install_impl(ctx):
     tools = [toolchain.ruby, toolchain.bundle]
     bundler = toolchain.bundle
     gem_path = ""
-    for gem in ctx.attr.gems:
-        if gem[GemInfo].name == "bundler":
-            bundler = gem.files.to_list()[-1].path + "/bin/bundle"
-            gem_path = gem.files.to_list()[-1].path
-            tools.extend(gem.files.to_list())
+    # for gem in ctx.attr.gems:
+    # if gem[GemInfo].name == "bundler":
+    # bundler = gem.files.to_list()[-1].path + "/bin/bundle"
+    # gem_path = gem.files.to_list()[-1].path
+    # tools.extend(gem.files.to_list())
 
     binstubs = ctx.actions.declare_directory("bin")
     bpath = ctx.actions.declare_directory("vendor/bundle")

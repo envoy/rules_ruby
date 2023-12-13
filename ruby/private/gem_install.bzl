@@ -2,7 +2,8 @@ load("//ruby/private:providers.bzl", "GemInfo")
 
 def _rb_gem_install_impl(ctx):
     gem = ctx.file.gem
-    install_dir = ctx.actions.declare_directory(gem.basename[:-4])
+
+    # install_dir = ctx.actions.declare_directory(gem.basename[:-4])
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
 
     # args = ctx.actions.args()
@@ -20,29 +21,29 @@ def _rb_gem_install_impl(ctx):
     # # args.add("--quiet")
     # # args.add("--silent")
 
-    gem_install = ctx.actions.declare_file("gem_install_%s.sh" % ctx.attr.name)
-    ctx.actions.expand_template(
-        template = ctx.file._gem_install_tpl,
-        output = gem_install,
-        substitutions = {
-            "{toolchain_bindir}": toolchain.bindir,
-            "{gem_binary}": toolchain.gem.path,
-            "{gem}": gem.path,
-            "{install_dir}": install_dir.path,
-        },
-    )
+    # gem_install = ctx.actions.declare_file("gem_install_%s.sh" % ctx.attr.name)
+    # ctx.actions.expand_template(
+    #     template = ctx.file._gem_install_tpl,
+    #     output = gem_install,
+    #     substitutions = {
+    #         "{toolchain_bindir}": toolchain.bindir,
+    #         "{gem_binary}": toolchain.gem.path,
+    #         "{gem}": gem.path,
+    #         "{install_dir}": install_dir.path,
+    #     },
+    # )
 
-    ctx.actions.run(
-        inputs = depset([gem, gem_install]),
-        executable = gem_install,
-        outputs = [install_dir],
-        # execution_requirements = {
-        #     # "no-sandbox": "true",
-        #     # "requires-network": "true",
-        # },
-        use_default_shell_env = True,
-        tools = [toolchain.ruby, toolchain.gem],
-    )
+    # ctx.actions.run(
+    #     inputs = depset([gem, gem_install]),
+    #     executable = gem_install,
+    #     outputs = [install_dir],
+    #     # execution_requirements = {
+    #     #     # "no-sandbox": "true",
+    #     #     # "requires-network": "true",
+    #     # },
+    #     use_default_shell_env = True,
+    #     tools = [toolchain.ruby, toolchain.gem],
+    # )
 
     # TODO: Use tar to pack output files.
     # https://github.com/bazelbuild/bazel/issues/18140
@@ -61,7 +62,7 @@ def _rb_gem_install_impl(ctx):
 
     return [
         DefaultInfo(
-            files = depset([gem, install_dir]),
+            files = depset([gem]),
         ),
         GemInfo(
             name = ctx.attr.name.rpartition("-")[0],

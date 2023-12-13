@@ -5,7 +5,7 @@ RubyFilesInfo = provider(
 )
 
 BundlerInfo = provider(
-    fields = ["bin", "gemfile", "vendor"],
+    fields = ["bin", "gemfile", "cache", "path"],
 )
 
 GemInfo = provider(

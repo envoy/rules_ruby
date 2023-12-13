@@ -73,7 +73,7 @@ def _rb_gem_build_impl(ctx):
     for dep in transitive_deps:
         if BundlerInfo in dep:
             providers.append(dep[BundlerInfo])
-            runfiles.merge(ctx.runfiles([dep[BundlerInfo].gemfile, dep[BundlerInfo].vendor]))
+            runfiles.merge(ctx.runfiles([dep[BundlerInfo].gemfile, dep[BundlerInfo].path]))
             break
 
     providers.extend([

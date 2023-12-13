@@ -3,13 +3,13 @@ load("//ruby/private:providers.bzl", "BundlerInfo", "GemInfo", "RubyFilesInfo")
 def _rb_bundle_install_impl(ctx):
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
 
-    vendor = ctx.actions.declare_directory("vendor")
+    cache = ctx.actions.declare_directory("vendor/cache")
     prepare_bundle_path = ctx.actions.declare_file("prepare_bundle_path.rb")
     ctx.actions.expand_template(
         template = ctx.file._prepare_bundle_path_tpl,
         output = prepare_bundle_path,
         substitutions = {
-            "{vendor_path}": vendor.path,
+            "{cache_path}": cache.path,
         },
     )
 
@@ -20,7 +20,7 @@ def _rb_bundle_install_impl(ctx):
         inputs = ctx.files.gems + [prepare_bundle_path],
         executable = toolchain.ruby,
         arguments = [args],
-        outputs = [vendor],
+        outputs = [cache],
     )
 
     tools = [toolchain.ruby, toolchain.bundle]
@@ -33,24 +33,33 @@ def _rb_bundle_install_impl(ctx):
             tools.extend(gem.files.to_list())
 
     binstubs = ctx.actions.declare_directory("bin")
+    bpath = ctx.actions.declare_directory("vendor/bundle")
     args = ctx.actions.args()
     args.add("install")
-    args.add("--local")
+
+    # args.add("--local")
     args.add("--no-cache")
+
     ctx.actions.run(
-        inputs = depset([vendor, ctx.file.gemfile, ctx.file.gemfile_lock] + ctx.files.srcs),
+        inputs = depset([cache, ctx.file.gemfile, ctx.file.gemfile_lock] + ctx.files.srcs),
         executable = bundler,
         arguments = [args],
-        outputs = [binstubs],
+        outputs = [binstubs, bpath],
+        execution_requirements = {
+            "requires-network": "true",
+        },
         env = {
+            "BUNDLE_ALLOW_OFFLINE_INSTALL": "true",
             "BUNDLE_BIN": "../../" + binstubs.path,
-            "BUNDLE_CACHE_PATH": "../../" + vendor.path + "/cache",
+            # "BUNDLE_CACHE_PATH": "../../" + vendor.path + "/cache",
+            # "BUNDLE_CACHE_ALL_PLATFORMS": "true",
             "BUNDLE_DEPLOYMENT": "true",
+            "BUNDLE_FROZEN": "true",
             "BUNDLE_DISABLE_SHARED_GEMS": "true",
             "BUNDLE_GEMFILE": ctx.file.gemfile.path,
-            "BUNDLE_PATH": "../../" + vendor.path + "/bundle",
+            "BUNDLE_PATH": "../../" + bpath.path,
             "BUNDLE_SHEBANG": toolchain.ruby.short_path,
-            "BUNDLE_STANDALONE": "true",
+            # "BUNDLE_STANDALONE": "true",
             "GEM_PATH": gem_path,
         },
         tools = tools,
@@ -69,7 +78,9 @@ def _rb_bundle_install_impl(ctx):
         BundlerInfo(
             bin = binstubs,
             gemfile = ctx.file.gemfile,
-            vendor = vendor,
+            cache = cache,
+            path = bpath,
+            # vendor = vendor,
         ),
     ]
 

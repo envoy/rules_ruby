@@ -131,8 +131,8 @@ def rb_binary_impl(ctx):
         if BundlerInfo in dep:
             info = dep[BundlerInfo]
             env.update({"BUNDLE_GEMFILE": info.gemfile.short_path.partition("/")[-1]})
-            env.update({"BUNDLE_PATH": info.vendor.short_path.partition("/")[-1] + "/bundle"})
-            transitive_srcs.extend([info.gemfile, info.bin, info.vendor])
+            env.update({"BUNDLE_PATH": info.path.short_path.partition("/")[-1]})
+            transitive_srcs.extend([info.gemfile, info.bin, info.path])
             bundler = True
 
     bundle_env = get_bundle_env(ctx.attr.env, ctx.attr.deps)

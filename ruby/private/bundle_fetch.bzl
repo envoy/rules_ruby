@@ -6,6 +6,7 @@ _GEM_INSTALL_BUILD_FRAGMENT = """
 rb_gem_install(
     name = "{name}",
     gem = "{gem}",
+    target_compatible_with = {target_compatible_with},
 )
 """
 
@@ -52,7 +53,25 @@ def _rb_bundle_fetch_impl(repository_ctx):
     executables = []
     gems = []
     gemfile_lock = parse_gemfile_lock(repository_ctx.read(gemfile_lock_path))
-    for gem in [gemfile_lock.bundler] + gemfile_lock.remote_packages:
+
+    # package_names = []
+    # packages = []
+    # reverse = []
+    # for g in gemfile_lock.remote_packages:
+    #     reverse.insert(0, g)
+    #
+    # for gem in reverse:
+    #     if any([package_name == gem.name for package_name in package_names]):
+    #         pass
+    #     else:
+    #         package_names.append(gem.name)
+    #         packages.append(gem)
+
+    for gem in [
+        gemfile_lock.bundler,
+        # struct(name = "ruby-maven", version = "3.3.13", filename = "ruby-maven-3.3.13.gem", full_name = "ruby-maven-3.3.13", remote = "https://rubygems.org/"),
+        # struct(name = "ruby-maven-libs", version = "3.3.9", filename = "ruby-maven-libs-3.3.9.gem", full_name = "ruby-maven-libs-3.3.9", remote = "https://rubygems.org/"),
+    ] + gemfile_lock.remote_packages:
         gems.append(gem)
         _download_gem(repository_ctx, gem)
         executables.extend(_get_gem_executables(repository_ctx, gem))
@@ -61,7 +80,11 @@ def _rb_bundle_fetch_impl(repository_ctx):
     gem_installs = []
     for gem in gems:
         gem_full_names.append(":%s" % gem.full_name)
-        gem_installs.append(_GEM_INSTALL_BUILD_FRAGMENT.format(name = gem.full_name, gem = gem.filename))
+        target_compatible_with = []
+
+        # if gem.version.endswith("-java"):
+        #     target_compatible_with.append("@rules_ruby_dist//platform:jruby")
+        gem_installs.append(_GEM_INSTALL_BUILD_FRAGMENT.format(name = gem.full_name, gem = gem.filename, target_compatible_with = repr(target_compatible_with)))
 
     repository_ctx.template(
         "BUILD",

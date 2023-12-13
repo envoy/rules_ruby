@@ -62,8 +62,9 @@ def _rb_bundle_install_impl(ctx):
             "BUNDLE_SHEBANG": toolchain.ruby.short_path,
             # "BUNDLE_STANDALONE": "true",
             # "GEM_PATH": gem_path,
-            # "PATH": toolchain.bindir,
+            "PATH": toolchain.bindir + ":$PATH",
         },
+        use_default_shell_env = True,
         tools = tools,
     )
 

@@ -45,7 +45,7 @@ def _rb_bundle_install_impl(ctx):
             "{bundle_path}": "../../" + bpath.path,
             "{home_path}": "../../" + home.path,
             "{bundler_path}": bundler_path,
-            "{ruby_path}": toolchain.ruby.short_path,
+            "{ruby_path}": toolchain.ruby.path,
             "{gem_path}": gem_path,
             "{path}": toolchain.bindir,
         },

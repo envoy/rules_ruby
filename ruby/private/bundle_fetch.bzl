@@ -77,6 +77,10 @@ def _rb_bundle_fetch_impl(repository_ctx):
         _download_gem(repository_ctx, gem)
         executables.extend(_get_gem_executables(repository_ctx, gem))
 
+    for gem in gemfile_lock.remote_packages:
+        _download_gem(repository_ctx, gem)
+        executables.extend(_get_gem_executables(repository_ctx, gem))
+
     gem_full_names = []
     gem_installs = []
     for gem in gems:

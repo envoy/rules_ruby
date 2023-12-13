@@ -1,4 +1,4 @@
-load("//ruby/private:providers.bzl", "BundlerInfo", "RubyFilesInfo")
+load("//ruby/private:providers.bzl", "BundlerInfo", "GemInfo", "RubyFilesInfo")
 
 def _rb_bundle_install_impl(ctx):
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]

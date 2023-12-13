@@ -25,7 +25,7 @@ def _rb_bundle_install_impl(ctx):
 
     tools = [toolchain.ruby, toolchain.bundle]
     bundler_path = toolchain.bundle.path
-    gem_path = "123"
+    gem_path = ""
     for gem in ctx.attr.gems:
         if gem[GemInfo].name == "bundler":
             bundler_path = gem.files.to_list()[-1].path + "/bin/bundle"
@@ -35,9 +35,23 @@ def _rb_bundle_install_impl(ctx):
     binstubs = ctx.actions.declare_directory("bin")
     bpath = ctx.actions.declare_directory("vendor/bundle")
     home = ctx.actions.declare_directory("home")
-    script = ctx.actions.declare_file("bundle_install.sh")
+
+    windows_constraint = ctx.attr._windows_constraint[platform_common.ConstraintValueInfo]
+    is_windows = ctx.target_platform_has_constraint(windows_constraint)
+    if is_windows:
+        path = toolchain.bindir.replace("/", "\\")
+        ruby_path = toolchain.ruby.path.replace("/", "\\")
+        script = ctx.actions.declare_file("{}.cmd".format(ctx.label.name))
+        bundler_path = bundler_path.replace("/", "\\")
+        template = ctx.file._bundle_install_cmd_tpl
+    else:
+        path = toolchain.bindir
+        ruby_path = toolchain.ruby.path
+        script = ctx.actions.declare_file("{}.sh".format(ctx.label.name))
+        template = ctx.file._bundle_install_sh_tpl
+
     ctx.actions.expand_template(
-        template = ctx.file._bundle_install_tpl,
+        template = template,
         output = script,
         substitutions = {
             "{binstubs_path}": "../../" + binstubs.path,
@@ -45,9 +59,9 @@ def _rb_bundle_install_impl(ctx):
             "{bundle_path}": "../../" + bpath.path,
             "{home_path}": "../../" + home.path,
             "{bundler_path}": bundler_path,
-            "{ruby_path}": toolchain.ruby.path,
+            "{ruby_path}": ruby_path,
             "{gem_path}": gem_path,
-            "{path}": toolchain.bindir,
+            "{path}": path,
         },
     )
 
@@ -107,9 +121,16 @@ rb_bundle_install = rule(
             allow_files = True,
             doc = "List of runtime dependencies needed by a program that depends on this library.",
         ),
-        "_bundle_install_tpl": attr.label(
+        "_bundle_install_sh_tpl": attr.label(
             allow_single_file = True,
             default = "@rules_ruby//ruby/private:bundle_install/bundle_install.sh.tpl",
+        ),
+        "_bundle_install_cmd_tpl": attr.label(
+            allow_single_file = True,
+            default = "@rules_ruby//ruby/private:bundle_install/bundle_install.cmd.tpl",
+        ),
+        "_windows_constraint": attr.label(
+            default = "@platforms//os:windows",
         ),
         "_prepare_bundle_path_tpl": attr.label(
             allow_single_file = True,

@@ -55,8 +55,9 @@ def _rb_bundle_install_impl(ctx):
         output = script,
         substitutions = {
             "{binstubs_path}": "../../" + binstubs.path,
+            "{bundle_path}": bpath.path,
             "{gemfile_path}": ctx.file.gemfile.path,
-            "{bundle_path}": "../../" + bpath.path,
+            "{cache_path}": cache.path,
             "{home_path}": "../../" + home.path,
             "{bundler_path}": bundler_path,
             "{ruby_path}": ruby_path,
@@ -66,26 +67,29 @@ def _rb_bundle_install_impl(ctx):
     )
 
     ctx.actions.run(
-        inputs = depset([cache, ctx.file.gemfile, ctx.file.gemfile_lock] + ctx.files.srcs),
+        inputs = depset([cache, ctx.file.gemfile, ctx.file.gemfile_lock, ctx.file._runfiles_library] + ctx.files.srcs),
         executable = script,
         outputs = [binstubs, bpath, home],
         execution_requirements = {
-            "requires-network": "true",
+            # "requires-network": "true",
         },
         use_default_shell_env = True,
-        tools = tools,
+        tools = tools + [ctx.file._runfiles_library],
     )
+
+    files = [
+        ctx.file.gemfile,
+        ctx.file.gemfile_lock,
+        binstubs,
+        home,
+        cache,
+        bpath,
+    ] + ctx.files.srcs
 
     return [
         DefaultInfo(
-            files = depset([
-                ctx.file.gemfile,
-                ctx.file.gemfile_lock,
-                binstubs,
-                home,
-                cache,
-                bpath,
-            ] + ctx.files.srcs),
+            files = depset(files),
+            runfiles = ctx.runfiles(files),
         ),
         RubyFilesInfo(
             transitive_srcs = depset([ctx.file.gemfile, ctx.file.gemfile_lock] + ctx.files.srcs),
@@ -120,6 +124,10 @@ rb_bundle_install = rule(
         "gems": attr.label_list(
             allow_files = True,
             doc = "List of runtime dependencies needed by a program that depends on this library.",
+        ),
+        "_runfiles_library": attr.label(
+            allow_single_file = True,
+            default = "@bazel_tools//tools/bash/runfiles",
         ),
         "_bundle_install_sh_tpl": attr.label(
             allow_single_file = True,

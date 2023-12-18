@@ -57,7 +57,7 @@ def _rb_bundle_install_impl(ctx):
             "{binstubs_path}": "../../" + binstubs.path,
             "{bundle_path}": bpath.path,
             "{gemfile_path}": ctx.file.gemfile.path,
-            "{cache_path}": cache.path,
+            "{cache_path}": "../../" + cache.path,
             "{home_path}": "../../" + home.path,
             "{bundler_path}": bundler_path,
             "{ruby_path}": ruby_path,

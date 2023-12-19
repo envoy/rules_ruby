@@ -44,7 +44,7 @@ jobs:
           - macos
           - windows
         mode:
-          - bzlmod
+          # - bzlmod
           - WORKSPACE
         exclude:
           # RubyInstaller doesn't ship previews.

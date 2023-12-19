@@ -39,12 +39,16 @@ def _rb_bundle_install_impl(ctx):
     windows_constraint = ctx.attr._windows_constraint[platform_common.ConstraintValueInfo]
     is_windows = ctx.target_platform_has_constraint(windows_constraint)
     if is_windows:
+        bundle_path = bpath.path.replace("/", "\\")
+        gemfile_path = ctx.file.gemfile.path.replace("/", "\\")
         path = toolchain.bindir.replace("/", "\\")
         ruby_path = toolchain.ruby.path.replace("/", "\\")
         script = ctx.actions.declare_file("{}.cmd".format(ctx.label.name))
         bundler_path = bundler_path.replace("/", "\\")
         template = ctx.file._bundle_install_cmd_tpl
     else:
+        bundle_path = bpath.path
+        gemfile_path = ctx.file.gemfile.path
         path = toolchain.bindir
         ruby_path = toolchain.ruby.path
         script = ctx.actions.declare_file("{}.sh".format(ctx.label.name))
@@ -55,8 +59,8 @@ def _rb_bundle_install_impl(ctx):
         output = script,
         substitutions = {
             "{binstubs_path}": "../../" + binstubs.path,
-            "{bundle_path}": bpath.path,
-            "{gemfile_path}": ctx.file.gemfile.path,
+            "{bundle_path}": bundle_path,
+            "{gemfile_path}": gemfile_path,
             "{cache_path}": "../../" + cache.path,
             "{home_path}": "../../" + home.path,
             "{bundler_path}": bundler_path,

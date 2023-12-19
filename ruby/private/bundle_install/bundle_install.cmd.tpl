@@ -1,18 +1,21 @@
 @echo on
 
-set BUNDLE_ALLOW_OFFLINE_INSTALL=true
+REM set BUNDLE_ALLOW_OFFLINE_INSTALL=true
 set BUNDLE_BIN={binstubs_path}
-set BUNDLE_DEPLOYMENT=true
+set BUNDLE_DEPLOYMENT=1
 set BUNDLE_DISABLE_SHARED_GEMS=true
-set BUNDLE_FROZEN=true
+REM set BUNDLE_FROZEN=true
 set BUNDLE_GEMFILE={gemfile_path}
-set BUNDLE_IGNORE_CONFIG=true
-set BUNDLE_PATH={bundle_path}
+set BUNDLE_IGNORE_CONFIG=1
+REM set BUNDLE_PATH={bundle_path}
 set BUNDLE_SHEBANG={ruby_path}
-set BUNDLE_USER_HOME={home_path}
-set GEM_PATH={gem_path}
+REM set BUNDLE_USER_HOME={home_path}
+REM set GEM_PATH={gem_path}
 set PATH={path};%PATH%
 
-{ruby_path} {bundler_path} install --full-index
+{ruby_path} {bundler_path} install --local
+
+for %%F in (%BUNDLE_GEMFILE%) do set GEMFILE_DIR=%%~dpF
+xcopy /e /k /h /i %GEMFILE_DIR%\vendor\bundle {bundle_path}
 
 :: vim: ft=dosbatch

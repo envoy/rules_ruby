@@ -13,6 +13,7 @@ concurrency:
 
 env:
   JAVA_OPTS: -Djdk.io.File.enableADS=true
+  LANG: en_US.UTF-8
 
 jobs:
   ruleset:

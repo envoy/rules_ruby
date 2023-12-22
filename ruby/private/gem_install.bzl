@@ -53,7 +53,7 @@ def _rb_gem_install_impl(ctx):
         #     # "requires-network": "true",
         # },
         use_default_shell_env = True,
-        tools = [toolchain.ruby, toolchain.gem],
+        tools = [toolchain.gem],
     )
 
     # TODO: Use tar to pack output files.

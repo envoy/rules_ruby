@@ -67,7 +67,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
     #         packages.append(gem)
 
     for gem in [
-        gemfile_lock.bundler,
+        # gemfile_lock.bundler,
         # struct(name = "ruby-maven", version = "3.3.13", filename = "ruby-maven-3.3.13.gem", full_name = "ruby-maven-3.3.13", remote = "https://rubygems.org/"),
         # struct(name = "ruby-maven-libs", version = "3.3.9", filename = "ruby-maven-libs-3.3.9.gem", full_name = "ruby-maven-libs-3.3.9", remote = "https://rubygems.org/"),
     ] + gemfile_lock.remote_packages:

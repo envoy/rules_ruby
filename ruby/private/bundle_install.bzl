@@ -25,16 +25,16 @@ def _rb_bundle_install_impl(ctx):
 
     tools = [toolchain.ruby, toolchain.bundle]
     bundler_path = toolchain.bundle.path
-    gem_path = ""
-    for gem in ctx.attr.gems:
-        if gem[GemInfo].name == "bundler":
-            bundler_path = gem.files.to_list()[-1].path + "/bin/bundle"
-            gem_path = gem.files.to_list()[-1].path
-            tools.extend(gem.files.to_list())
+    # gem_path = ""
+    # for gem in ctx.attr.gems:
+    #     if gem[GemInfo].name == "bundler":
+    #         bundler_path = gem.files.to_list()[-1].path + "/bin/bundle"
+    #         gem_path = gem.files.to_list()[-1].path
+    #         tools.extend(gem.files.to_list())
 
     binstubs = ctx.actions.declare_directory("bin")
     bpath = ctx.actions.declare_directory("vendor/bundle")
-    home = ctx.actions.declare_directory("home")
+    # home = ctx.actions.declare_directory("home")
 
     windows_constraint = ctx.attr._windows_constraint[platform_common.ConstraintValueInfo]
     is_windows = ctx.target_platform_has_constraint(windows_constraint)
@@ -62,10 +62,10 @@ def _rb_bundle_install_impl(ctx):
             "{bundle_path}": "../../" + bundle_path,
             "{gemfile_path}": gemfile_path,
             # "{cache_path}": "../../" + cache.path,
-            "{home_path}": "../../" + home.path,
+            # "{home_path}": "../../" + home.path,
             "{bundler_path}": bundler_path,
             "{ruby_path}": ruby_path,
-            "{gem_path}": gem_path,
+            # "{gem_path}": gem_path,
             "{path}": path,
         },
     )
@@ -73,7 +73,7 @@ def _rb_bundle_install_impl(ctx):
     ctx.actions.run(
         inputs = depset([ctx.file.gemfile, ctx.file.gemfile_lock] + ctx.files.srcs + ctx.files.gems),
         executable = script,
-        outputs = [binstubs, bpath, home],
+        outputs = [binstubs, bpath],
         execution_requirements = {
             # "requires-network": "true",
         },
@@ -85,7 +85,6 @@ def _rb_bundle_install_impl(ctx):
         ctx.file.gemfile,
         ctx.file.gemfile_lock,
         binstubs,
-        home,
         bpath,
     ] + ctx.files.srcs
 
@@ -97,7 +96,7 @@ def _rb_bundle_install_impl(ctx):
         RubyFilesInfo(
             transitive_srcs = depset([ctx.file.gemfile, ctx.file.gemfile_lock] + ctx.files.srcs),
             transitive_deps = depset(),
-            transitive_data = depset([home]),
+            transitive_data = depset([]),
             bundle_env = {},
         ),
         BundlerInfo(

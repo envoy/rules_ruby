@@ -2,12 +2,14 @@
 
 
 # ctx.actions.run("gem", "install"...) doesn't work for JRuby
+#
+export LANG=en_US.UTF-8
 
 # Set environment variables.
 export PATH={toolchain_bindir}:$PATH
 
 if [ '{gem}' = 'external/bundle/vendor/cache/bundler-2.1.4.gem' ]; then
-  ruby {gem_binary} \
+  {gem_binary} \
     install {gem} \
     --wrappers \
     --ignore-dependencies \

@@ -67,6 +67,7 @@ def _install_jruby(repository_ctx, version):
 
     if repository_ctx.os.name.startswith("windows"):
         repository_ctx.symlink("dist/bin/bundle.bat", "dist/bin/bundle.cmd")
+        repository_ctx.symlink("dist/bin/jgem.bat", "dist/bin/jgem.cmd")
 
 # https://github.com/oneclick/rubyinstaller2/wiki/FAQ#q-how-do-i-perform-a-silentunattended-install-with-the-rubyinstaller
 def _install_via_rubyinstaller(repository_ctx, version):

@@ -198,8 +198,8 @@ test --test_verbose_timeout_warnings=false
 build --action_env=HOME
 test --test_env=HOME
 
-build --action_env=LANG
-test --test_env=LANG
+build --action_env=LANG="en_US.UTF-8"
+test --test_env=LANG="en_US.UTF-8"
 
 # JRuby might fail with "Errno::EACCES: Permission denied - NUL" on Windows:
 # https://github.com/jruby/jruby/issues/7182#issuecomment-1112953015.

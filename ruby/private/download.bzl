@@ -89,7 +89,7 @@ def _install_via_rubyinstaller(repository_ctx, version):
     if result.return_code != 0:
         fail("%s\n%s" % (result.stdout, result.stderr))
 
-    result = repository_ctx.execute(["./dist/bin/ridk.cmd", "install", "1"])
+    result = repository_ctx.execute(["./dist/bin/ridk.cmd", "install", "1", "3"])
     if result.return_code != 0:
         fail("%s\n%s" % (result.stdout, result.stderr))
 

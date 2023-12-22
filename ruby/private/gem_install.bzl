@@ -24,10 +24,12 @@ def _rb_gem_install_impl(ctx):
     is_windows = ctx.target_platform_has_constraint(windows_constraint)
     if is_windows:
         toolchain_bindir = toolchain.bindir.replace("/", "\\")
+        gem_binary = toolchain.gem.path
         gem_install = ctx.actions.declare_file("gem_install_{}.cmd".format(ctx.label.name))
         template = ctx.file._gem_install_cmd_tpl
     else:
         toolchain_bindir = toolchain.bindir
+        gem_binary = toolchain.gem.path.replace("/", "\\")
         gem_install = ctx.actions.declare_file("gem_install_{}.sh".format(ctx.label.name))
         template = ctx.file._gem_install_sh_tpl
 
@@ -36,7 +38,7 @@ def _rb_gem_install_impl(ctx):
         output = gem_install,
         substitutions = {
             "{toolchain_bindir}": toolchain_bindir,
-            "{gem_binary}": toolchain.gem.path,
+            "{gem_binary}": gem_binary,
             "{gem}": gem.path,
             "{install_dir}": install_dir.path,
         },

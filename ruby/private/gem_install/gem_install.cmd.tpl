@@ -2,7 +2,7 @@
 
 set PATH={toolchain_bindir};%PATH%
 
-if "{gem}" eq "external/bundle/vendor/cache/bundler-2.1.4.gem" (
+if "{gem}" == "external/bundle/vendor/cache/bundler-2.1.4.gem" (
   {gem_binary} ^
     install {gem} ^
     --wrappers ^

@@ -5,18 +5,17 @@ load("//ruby/private/bundle_fetch:gemfile_lock_parser.bzl", "parse_gemfile_lock"
 _GEM_INSTALL_BUILD_FRAGMENT = """
 rb_gem_install(
     name = "{name}",
-    gem = "{gem}",
-    target_compatible_with = {target_compatible_with},
+    src = "vendor/cache/{gem}",
 )
 """
 
 def _download_gem(repository_ctx, gem):
     url = "{remote}gems/{filename}".format(remote = gem.remote, filename = gem.filename)
-    repository_ctx.download(url = url, output = gem.filename)
+    repository_ctx.download(url = url, output = "vendor/cache/%s" % gem.filename)
 
 def _get_gem_executables(repository_ctx, gem):
     executables = []
-    repository_ctx.symlink(gem.filename, gem.filename + ".tar")
+    repository_ctx.symlink("vendor/cache/" + gem.filename, gem.filename + ".tar")
     repository_ctx.extract(gem.filename + ".tar", output = gem.full_name)
     data = "/".join([gem.full_name, "data"])
     repository_ctx.extract("/".join([gem.full_name, "data.tar.gz"]), output = data)
@@ -76,19 +75,18 @@ def _rb_bundle_fetch_impl(repository_ctx):
         _download_gem(repository_ctx, gem)
         executables.extend(_get_gem_executables(repository_ctx, gem))
 
-    for gem in gemfile_lock.remote_packages:
-        _download_gem(repository_ctx, gem)
-        executables.extend(_get_gem_executables(repository_ctx, gem))
+    # for gem in gemfile_lock.remote_packages:
+    #     _download_gem(repository_ctx, gem)
+    #     executables.extend(_get_gem_executables(repository_ctx, gem))
 
     gem_full_names = []
     gem_installs = []
     for gem in gems:
         gem_full_names.append(":%s" % gem.full_name)
-        target_compatible_with = []
 
         # if gem.version.endswith("-java"):
         #     target_compatible_with.append("@rules_ruby_dist//platform:jruby")
-        gem_installs.append(_GEM_INSTALL_BUILD_FRAGMENT.format(name = gem.full_name, gem = gem.filename, target_compatible_with = repr(target_compatible_with)))
+        gem_installs.append(_GEM_INSTALL_BUILD_FRAGMENT.format(name = gem.full_name, gem = gem.filename))
 
     repository_ctx.template(
         "BUILD",
@@ -110,6 +108,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
             "{name}": repository_ctx.name.rpartition("~")[-1],
         },
     )
+
     for executable in executables:
         repository_ctx.file("/".join(["bin", executable]))
 

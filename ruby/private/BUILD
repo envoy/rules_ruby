@@ -5,6 +5,7 @@ exports_files([
     "bundle_install/bundle_install.sh.tpl",
     "bundle_install/prepare_bundle_path.rb.tpl",
     "gem_build/gem_builder.rb.tpl",
+    "gem_install/gem_install.cmd.tpl",
     "gem_install/gem_install.sh.tpl",
 ])
 

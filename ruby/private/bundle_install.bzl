@@ -3,25 +3,25 @@ load("//ruby/private:providers.bzl", "BundlerInfo", "GemInfo", "RubyFilesInfo")
 def _rb_bundle_install_impl(ctx):
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
 
-    cache = ctx.actions.declare_directory("vendor/cache")
-    prepare_bundle_path = ctx.actions.declare_file("prepare_bundle_path.rb")
-    ctx.actions.expand_template(
-        template = ctx.file._prepare_bundle_path_tpl,
-        output = prepare_bundle_path,
-        substitutions = {
-            "{cache_path}": cache.path,
-        },
-    )
+    # cache = ctx.actions.declare_directory("vendor/cache")
+    # prepare_bundle_path = ctx.actions.declare_file("prepare_bundle_path.rb")
+    # ctx.actions.expand_template(
+    #     template = ctx.file._prepare_bundle_path_tpl,
+    #     output = prepare_bundle_path,
+    #     substitutions = {
+    #         "{cache_path}": cache.path,
+    #     },
+    # )
 
-    args = ctx.actions.args()
-    args.add(prepare_bundle_path)
-    args.add_all(ctx.files.gems, expand_directories = False)
-    ctx.actions.run(
-        inputs = ctx.files.gems + [prepare_bundle_path],
-        executable = toolchain.ruby,
-        arguments = [args],
-        outputs = [cache],
-    )
+    # args = ctx.actions.args()
+    # args.add(prepare_bundle_path)
+    # args.add_all(ctx.files.gems, expand_directories = False)
+    # ctx.actions.run(
+    #     inputs = ctx.files.gems + [prepare_bundle_path],
+    #     executable = toolchain.ruby,
+    #     arguments = [args],
+    #     outputs = [cache],
+    # )
 
     tools = [toolchain.ruby, toolchain.bundle]
     bundler_path = toolchain.bundle.path
@@ -59,9 +59,9 @@ def _rb_bundle_install_impl(ctx):
         output = script,
         substitutions = {
             "{binstubs_path}": "../../" + binstubs.path,
-            "{bundle_path}": bundle_path,
+            "{bundle_path}": "../../" + bundle_path,
             "{gemfile_path}": gemfile_path,
-            "{cache_path}": "../../" + cache.path,
+            # "{cache_path}": "../../" + cache.path,
             "{home_path}": "../../" + home.path,
             "{bundler_path}": bundler_path,
             "{ruby_path}": ruby_path,
@@ -71,14 +71,14 @@ def _rb_bundle_install_impl(ctx):
     )
 
     ctx.actions.run(
-        inputs = depset([cache, ctx.file.gemfile, ctx.file.gemfile_lock, ctx.file._runfiles_library] + ctx.files.srcs),
+        inputs = depset([ctx.file.gemfile, ctx.file.gemfile_lock] + ctx.files.srcs + ctx.files.gems),
         executable = script,
         outputs = [binstubs, bpath, home],
         execution_requirements = {
             # "requires-network": "true",
         },
         use_default_shell_env = True,
-        tools = tools + [ctx.file._runfiles_library],
+        tools = tools,
     )
 
     files = [
@@ -86,7 +86,6 @@ def _rb_bundle_install_impl(ctx):
         ctx.file.gemfile_lock,
         binstubs,
         home,
-        cache,
         bpath,
     ] + ctx.files.srcs
 
@@ -104,7 +103,6 @@ def _rb_bundle_install_impl(ctx):
         BundlerInfo(
             bin = binstubs,
             gemfile = ctx.file.gemfile,
-            cache = cache,
             path = bpath,
             # vendor = vendor,
         ),

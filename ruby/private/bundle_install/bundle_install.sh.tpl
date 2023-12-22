@@ -17,23 +17,19 @@ set -euo pipefail
 
 
 # export BUNDLE_FROZEN="true"
-# export BUNDLE_PATH={bundle_path}
 # export BUNDLE_ALLOW_OFFLINE_INSTALL="true"
 export BUNDLE_BIN={binstubs_path}
-export BUNDLE_CACHE_PATH={cache_path}
+# export BUNDLE_CACHE_PATH={cache_path}
 export BUNDLE_DEPLOYMENT=1
 export BUNDLE_DISABLE_SHARED_GEMS=1
 export BUNDLE_GEMFILE={gemfile_path}
 export BUNDLE_IGNORE_CONFIG=1
+export BUNDLE_PATH={bundle_path}
 export BUNDLE_SHEBANG={ruby_path}
 # export BUNDLE_USER_HOME=$(pwd)
 # export GEM_PATH={gem_path}
 export PATH={path}:$PATH
 
-# ls -al $BUNDLE_CACHE_PATH
-
-{ruby_path} {bundler_path} install --local
-
-cp -R $(dirname {gemfile_path})/vendor/bundle/* {bundle_path}
+{ruby_path} -I{gem_path} {bundler_path} install --local
 
 # vim: ft=bash

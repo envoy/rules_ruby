@@ -6,8 +6,8 @@
 # Set environment variables.
 export PATH={toolchain_bindir}:$PATH
 
-if [ '{gem}' = 'external/bundle/bundler-2.1.4.gem' ]; then
-  {gem_binary} \
+if [ '{gem}' = 'external/bundle/vendor/cache/bundler-2.1.4.gem' ]; then
+  ruby {gem_binary} \
     install {gem} \
     --wrappers \
     --ignore-dependencies \
@@ -16,8 +16,8 @@ if [ '{gem}' = 'external/bundle/bundler-2.1.4.gem' ]; then
     --no-env-shebang \
     --install-dir {install_dir} \
     --bindir {install_dir}/bin \
-    # --quiet \
-    # --silent
+    --quiet \
+    --silent
 fi
 
 # vim: ft=bash

@@ -30,6 +30,6 @@ export BUNDLE_SHEBANG={ruby_path}
 # export GEM_PATH={gem_path}
 export PATH={path}:$PATH
 
-{ruby_path} -I{gem_path} {bundler_path} install --local
+{bundler_path} install --local
 
 # vim: ft=bash

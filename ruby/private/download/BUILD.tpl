@@ -21,7 +21,7 @@ filegroup(
 filegroup(
     name = "gem",
     srcs = select({
-        "@platforms//os:windows": ["dist/bin/{gem_binary_name}.cmd"],
+        "@platforms//os:windows": ["dist/bin/gem.cmd"],
         "//conditions:default": ["dist/bin/{gem_binary_name}"],
     }),
 )

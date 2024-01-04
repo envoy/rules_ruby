@@ -73,7 +73,7 @@ def _rb_gem_install_impl(ctx):
 
     return [
         DefaultInfo(
-            files = depset([gem, install_dir]),
+            files = depset([gem, install_dir] + ctx.files.data),
         ),
         GemInfo(
             name = ctx.attr.name.rpartition("-")[0],
@@ -88,6 +88,9 @@ rb_gem_install = rule(
             allow_single_file = [".gem"],
             mandatory = True,
             doc = "Gem file to install.",
+        ),
+        "data": attr.label_list(
+            allow_files = True,
         ),
         "_gem_install_cmd_tpl": attr.label(
             allow_single_file = True,

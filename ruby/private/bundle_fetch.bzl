@@ -6,6 +6,7 @@ _GEM_INSTALL_BUILD_FRAGMENT = """
 rb_gem_install(
     name = "{name}",
     src = "vendor/cache/{gem}",
+    data = {data},
 )
 """
 
@@ -67,13 +68,18 @@ def _rb_bundle_fetch_impl(repository_ctx):
     #         packages.append(gem)
 
     for gem in [
-        # gemfile_lock.bundler,
+        gemfile_lock.bundler,
         # struct(name = "ruby-maven", version = "3.3.13", filename = "ruby-maven-3.3.13.gem", full_name = "ruby-maven-3.3.13", remote = "https://rubygems.org/"),
         # struct(name = "ruby-maven-libs", version = "3.3.9", filename = "ruby-maven-libs-3.3.9.gem", full_name = "ruby-maven-libs-3.3.9", remote = "https://rubygems.org/"),
     ] + gemfile_lock.remote_packages:
         gems.append(gem)
         _download_gem(repository_ctx, gem)
         executables.extend(_get_gem_executables(repository_ctx, gem))
+
+    repository_ctx.symlink("vendor/cache/" + gemfile_lock.bundler.filename, gemfile_lock.bundler.filename + ".tar")
+    repository_ctx.extract(gemfile_lock.bundler.filename + ".tar", output = "vendor/cache/" + gemfile_lock.bundler.full_name)
+    data = "/".join(["vendor/cache", gemfile_lock.bundler.full_name, "bundler"])
+    repository_ctx.extract("/".join(["vendor/cache", gemfile_lock.bundler.full_name, "data.tar.gz"]), output = data)
 
     # for gem in gemfile_lock.remote_packages:
     #     _download_gem(repository_ctx, gem)
@@ -86,7 +92,10 @@ def _rb_bundle_fetch_impl(repository_ctx):
 
         # if gem.version.endswith("-java"):
         #     target_compatible_with.append("@rules_ruby_dist//platform:jruby")
-        gem_installs.append(_GEM_INSTALL_BUILD_FRAGMENT.format(name = gem.full_name, gem = gem.filename))
+        d = "[]"
+        if gem.full_name == "bundler-2.2.3":
+            d = 'glob(["vendor/cache/bundler-2.2.3/**/*"])'
+        gem_installs.append(_GEM_INSTALL_BUILD_FRAGMENT.format(name = gem.full_name, gem = gem.filename, data = d))
 
     repository_ctx.template(
         "BUILD",

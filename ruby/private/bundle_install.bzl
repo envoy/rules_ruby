@@ -34,6 +34,11 @@ def _rb_bundle_install_impl(ctx):
     binstubs = ctx.actions.declare_directory("bin")
     bpath = ctx.actions.declare_directory("vendor/bundle")
     # home = ctx.actions.declare_directory("home")
+   
+    if toolchain.version.startswith("jruby"):
+        java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
+        tools.extend(java_toolchain.java_runtime.files.to_list())
+        java_home = java_toolchain.java_runtime.java_home
 
     windows_constraint = ctx.attr._windows_constraint[platform_common.ConstraintValueInfo]
     is_windows = ctx.target_platform_has_constraint(windows_constraint)
@@ -66,6 +71,7 @@ def _rb_bundle_install_impl(ctx):
             "{ruby_path}": ruby_path,
             # "{gem_path}": gem_path,
             "{path}": path,
+            "{java_home}": java_home,
         },
     )
 

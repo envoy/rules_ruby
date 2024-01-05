@@ -22,7 +22,7 @@ export BUNDLE_BIN={binstubs_path}
 # export BUNDLE_CACHE_PATH={cache_path}
 export BUNDLE_DEPLOYMENT=1
 export BUNDLE_DISABLE_SHARED_GEMS=1
-# export BUNDLE_DISABLE_VERSION_CHECK=1
+export BUNDLE_DISABLE_VERSION_CHECK=1
 export BUNDLE_GEMFILE={gemfile_path}
 export BUNDLE_IGNORE_CONFIG=1
 export BUNDLE_PATH={bundle_path}
@@ -30,6 +30,7 @@ export BUNDLE_SHEBANG={ruby_path}
 # export BUNDLE_USER_HOME=$(pwd)
 # export GEM_PATH={gem_path}
 export PATH={path}:$PATH
+export JAVA_HOME={java_home}
 
 export LANG=en_US.UTF-8
 

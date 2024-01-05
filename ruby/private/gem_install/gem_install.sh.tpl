@@ -7,6 +7,7 @@ export LANG=en_US.UTF-8
 
 # Set environment variables.
 export PATH={toolchain_bindir}:$PATH
+export JAVA_HOME={java_home}
 
 if [ '{gem}' = 'external/bundle/vendor/cache/bundler-2.2.19.gem' ]; then
   {gem_binary} \
@@ -17,9 +18,7 @@ if [ '{gem}' = 'external/bundle/vendor/cache/bundler-2.2.19.gem' ]; then
     --no-document \
     --no-env-shebang \
     --install-dir {install_dir} \
-    --bindir {install_dir}/bin  \
-    --quiet \
-    --silent
+    --bindir {install_dir}/bin
 fi
 
 # vim: ft=bash

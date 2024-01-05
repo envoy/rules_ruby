@@ -19,6 +19,12 @@ def _rb_gem_install_impl(ctx):
     # args.add("--local")
     # # args.add("--quiet")
     # # args.add("--silent")
+   
+    tools = [toolchain.gem]
+    if toolchain.version.startswith("jruby"):
+        java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
+        tools.extend(java_toolchain.java_runtime.files.to_list())
+        java_home = java_toolchain.java_runtime.java_home
 
     windows_constraint = ctx.attr._windows_constraint[platform_common.ConstraintValueInfo]
     is_windows = ctx.target_platform_has_constraint(windows_constraint)
@@ -41,6 +47,7 @@ def _rb_gem_install_impl(ctx):
             "{gem_binary}": gem_binary,
             "{gem}": gem.path,
             "{install_dir}": install_dir.path,
+            "{java_home}": java_home,
         },
     )
 
@@ -53,7 +60,7 @@ def _rb_gem_install_impl(ctx):
         #     # "requires-network": "true",
         # },
         use_default_shell_env = True,
-        tools = [toolchain.gem],
+        tools = tools,
     )
 
     # TODO: Use tar to pack output files.

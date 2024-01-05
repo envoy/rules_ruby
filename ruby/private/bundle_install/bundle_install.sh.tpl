@@ -31,6 +31,8 @@ export BUNDLE_SHEBANG={ruby_path}
 # export GEM_PATH={gem_path}
 export PATH={path}:$PATH
 export JAVA_HOME={java_home}
+export JAVA_OPTS=-Djdk.io.File.enableADS=true
+
 
 export LANG=en_US.UTF-8
 

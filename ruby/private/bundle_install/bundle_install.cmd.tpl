@@ -14,6 +14,7 @@ REM set BUNDLE_USER_HOME={home_path}
 REM set GEM_PATH={gem_path}
 set PATH={path};%PATH%
 set JAVA_HOME={java_home}
+set JAVA_OPTS=-Djdk.io.File.enableADS=true
 
 {ruby_path} {bundler_path} install --local
 

@@ -5,21 +5,6 @@ def _rb_gem_install_impl(ctx):
     install_dir = ctx.actions.declare_directory(gem.basename[:-4])
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
 
-    # args = ctx.actions.args()
-    # args.add("install")
-    # args.add(gem)
-    # args.add("--install-dir")
-    # args.add(install_dir.path)
-    # args.add("--bindir")
-    # args.add(install_dir.path + "/bin")
-    # args.add("--wrappers")
-    # args.add("--no-env-shebang")
-    # args.add("--ignore-dependencies")
-    # args.add("--no-document")
-    # args.add("--local")
-    # # args.add("--quiet")
-    # # args.add("--silent")
-
     tools = [toolchain.gem]
     java_home = ""
     if toolchain.version.startswith("jruby"):
@@ -56,28 +41,9 @@ def _rb_gem_install_impl(ctx):
         inputs = depset([gem, gem_install]),
         executable = gem_install,
         outputs = [install_dir],
-        # execution_requirements = {
-        #     # "no-sandbox": "true",
-        #     # "requires-network": "true",
-        # },
         use_default_shell_env = True,
         tools = tools,
     )
-
-    # TODO: Use tar to pack output files.
-    # https://github.com/bazelbuild/bazel/issues/18140
-
-    # ctx.actions.run(
-    #     inputs = depset([gem]),
-    #     executable = ctx.toolchains["@rules_ruby//ruby:toolchain_type"].gem,
-    #     arguments = [args],
-    #     outputs = [install_dir],
-    #     # env = {
-    #     #     "PATH": ctx.toolchains["@rules_ruby//ruby:toolchain_type"].bindir,
-    #     # },
-    #     use_default_shell_env = True,
-    #     tools = [ctx.toolchains["@rules_ruby//ruby:toolchain_type"].ruby],
-    # )
 
     return [
         DefaultInfo(
@@ -96,9 +62,6 @@ rb_gem_install = rule(
             allow_single_file = [".gem"],
             mandatory = True,
             doc = "Gem file to install.",
-        ),
-        "data": attr.label_list(
-            allow_files = True,
         ),
         "_gem_install_cmd_tpl": attr.label(
             allow_single_file = True,

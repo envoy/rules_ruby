@@ -11,16 +11,14 @@ export JAVA_HOME={java_home}
 export JAVA_OPTS=-Djdk.io.File.enableADS=true
 
 
-if [ '{gem}' = 'external/bundle/vendor/cache/bundler-2.2.19.gem' ]; then
-  {gem_binary} \
-    install {gem} \
-    --wrappers \
-    --ignore-dependencies \
-    --local \
-    --no-document \
-    --no-env-shebang \
-    --install-dir {install_dir} \
-    --bindir {install_dir}/bin
-fi
+{gem_binary} \
+  install {gem} \
+  --wrappers \
+  --ignore-dependencies \
+  --local \
+  --no-document \
+  --no-env-shebang \
+  --install-dir {install_dir} \
+  --bindir {install_dir}/bin
 
 # vim: ft=bash

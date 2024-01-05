@@ -2,11 +2,17 @@
 
 load("//ruby/private/bundle_fetch:gemfile_lock_parser.bzl", "parse_gemfile_lock")
 
+_GEM_BUILD_FRAGMENT = """
+rb_gem(
+    name = "{name}",
+    src = "vendor/cache/{gem}",
+)
+"""
+ 
 _GEM_INSTALL_BUILD_FRAGMENT = """
 rb_gem_install(
     name = "{name}",
     src = "vendor/cache/{gem}",
-    data = {data},
 )
 """
 
@@ -39,6 +45,9 @@ def _cleanup_downloads(repository_ctx, gem):
 def _join_and_indent(names):
     return "[\n        " + "\n        ".join(['"%s",' % name for name in names]) + "\n    ]"
 
+def _normalize_bzlmod_repositor_name(name):
+    return name.rpartition("~")[-1]
+
 def _rb_bundle_fetch_impl(repository_ctx):
     gemfile_path = repository_ctx.path(repository_ctx.attr.gemfile)
     gemfile_lock_path = repository_ctx.path(repository_ctx.attr.gemfile_lock)
@@ -51,61 +60,34 @@ def _rb_bundle_fetch_impl(repository_ctx):
         repository_ctx.file(src.name, repository_ctx.read(src))
 
     executables = []
-    gems = []
     gemfile_lock = parse_gemfile_lock(repository_ctx.read(gemfile_lock_path))
+    gem_full_names = []
+    gem_fragments = []
+    gem_install_fragments = []
 
-    # package_names = []
-    # packages = []
-    # reverse = []
-    # for g in gemfile_lock.remote_packages:
-    #     reverse.insert(0, g)
-    #
-    # for gem in reverse:
-    #     if any([package_name == gem.name for package_name in package_names]):
-    #         pass
-    #     else:
-    #         package_names.append(gem.name)
-    #         packages.append(gem)
-
-    for gem in [
-        gemfile_lock.bundler,
-        # struct(name = "ruby-maven", version = "3.3.13", filename = "ruby-maven-3.3.13.gem", full_name = "ruby-maven-3.3.13", remote = "https://rubygems.org/"),
-        # struct(name = "ruby-maven-libs", version = "3.3.9", filename = "ruby-maven-libs-3.3.9.gem", full_name = "ruby-maven-libs-3.3.9", remote = "https://rubygems.org/"),
-    ] + gemfile_lock.remote_packages:
-        gems.append(gem)
+    # Fetch all gems.
+    for gem in gemfile_lock.remote_packages:
         _download_gem(repository_ctx, gem)
         executables.extend(_get_gem_executables(repository_ctx, gem))
-
-    repository_ctx.symlink("vendor/cache/" + gemfile_lock.bundler.filename, gemfile_lock.bundler.filename + ".tar")
-    repository_ctx.extract(gemfile_lock.bundler.filename + ".tar", output = "vendor/cache/" + gemfile_lock.bundler.full_name)
-    data = "/".join(["vendor/cache", gemfile_lock.bundler.full_name, "bundler"])
-    repository_ctx.extract("/".join(["vendor/cache", gemfile_lock.bundler.full_name, "data.tar.gz"]), output = data)
-
-    # for gem in gemfile_lock.remote_packages:
-    #     _download_gem(repository_ctx, gem)
-    #     executables.extend(_get_gem_executables(repository_ctx, gem))
-
-    gem_full_names = []
-    gem_installs = []
-    for gem in gems:
         gem_full_names.append(":%s" % gem.full_name)
+        gem_fragments.append(_GEM_BUILD_FRAGMENT.format(name = gem.full_name, gem = gem.filename))
 
-        # if gem.version.endswith("-java"):
-        #     target_compatible_with.append("@rules_ruby_dist//platform:jruby")
-        d = "[]"
-        if gem.full_name == "bundler-2.2.19":
-            d = 'glob(["vendor/cache/bundler-2.2.19/**/*"])'
-        gem_installs.append(_GEM_INSTALL_BUILD_FRAGMENT.format(name = gem.full_name, gem = gem.filename, data = d))
+    # Fetch and install bundler.
+    _download_gem(repository_ctx, gemfile_lock.bundler)
+    executables.extend(_get_gem_executables(repository_ctx, gemfile_lock.bundler))
+    gem_full_names.append(":%s" % gemfile_lock.bundler.full_name)
+    gem_install_fragments.append(_GEM_INSTALL_BUILD_FRAGMENT.format(name = gemfile_lock.bundler.full_name, gem = gemfile_lock.bundler.filename))
 
     repository_ctx.template(
         "BUILD",
         repository_ctx.attr._build_tpl,
         executable = False,
         substitutions = {
-            "{name}": repository_ctx.name.rpartition("~")[-1],
+            "{name}": _normalize_bzlmod_repositor_name(repository_ctx.name),
             "{srcs}": _join_and_indent(srcs),
             "{gems}": _join_and_indent(gem_full_names),
-            "{gem_installs}": "".join(gem_installs),
+            "{gem_fragments}": "".join(gem_fragments),
+            "{gem_install_fragments}": "".join(gem_install_fragments),
         },
     )
 
@@ -114,12 +96,12 @@ def _rb_bundle_fetch_impl(repository_ctx):
         repository_ctx.attr._bin_build_tpl,
         executable = False,
         substitutions = {
-            "{name}": repository_ctx.name.rpartition("~")[-1],
+            "{name}": _normalize_bzlmod_repositor_name(repository_ctx.name),
         },
     )
 
     for executable in executables:
-        repository_ctx.file("/".join(["bin", executable]))
+        repository_ctx.file("bin/%s" % executable)
 
 rb_bundle_fetch = repository_rule(
     implementation = _rb_bundle_fetch_impl,

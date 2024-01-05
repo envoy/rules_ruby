@@ -31,11 +31,11 @@ export BUNDLE_SHEBANG={ruby_path}
 # export GEM_PATH={gem_path}
 export PATH={path}:$PATH
 
-# external/bundle/vendor/cache/bundler-2.2.3/bundler/exe/bundle install --local
+external/bundle/vendor/cache/bundler-2.2.19/bundler/exe/bundle install --local
 
 # {bundler_path} --version
 # {bundler_path} _2.2.3_ --version
 # exit 1
-{bundler_path} _2.2.19_ install --local
+# {bundler_path} _2.2.19_ install --local
 
 # vim: ft=bash

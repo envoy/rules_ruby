@@ -93,8 +93,8 @@ def _rb_bundle_fetch_impl(repository_ctx):
         # if gem.version.endswith("-java"):
         #     target_compatible_with.append("@rules_ruby_dist//platform:jruby")
         d = "[]"
-        if gem.full_name == "bundler-2.2.3":
-            d = 'glob(["vendor/cache/bundler-2.2.3/**/*"])'
+        if gem.full_name == "bundler-2.2.19":
+            d = 'glob(["vendor/cache/bundler-2.2.19/**/*"])'
         gem_installs.append(_GEM_INSTALL_BUILD_FRAGMENT.format(name = gem.full_name, gem = gem.filename, data = d))
 
     repository_ctx.template(

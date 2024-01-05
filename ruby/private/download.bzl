@@ -98,6 +98,10 @@ def _install_via_rubyinstaller(repository_ctx, version):
     if result.return_code != 0:
         fail("%s\n%s" % (result.stdout, result.stderr))
 
+    result = repository_ctx.execute(["./dist/bin/ridk.cmd", "exec", "pacman", "-S", "--noconfirm", "mingw-w64-ucrt-x86_64-libyaml"])
+    if result.return_code != 0:
+        fail("%s\n%s" % (result.stdout, result.stderr))
+
     binpath = repository_ctx.path("dist/bin")
     if not binpath.get_child("bundle.cmd").exists:
         repository_ctx.symlink(

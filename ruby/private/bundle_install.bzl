@@ -36,6 +36,7 @@ def _rb_bundle_install_impl(ctx):
     bpath = ctx.actions.declare_directory("vendor/bundle")
     # home = ctx.actions.declare_directory("home")
 
+    java_home = ""
     if toolchain.version.startswith("jruby"):
         java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
         tools.extend(java_toolchain.java_runtime.files.to_list())

@@ -21,6 +21,7 @@ def _rb_gem_install_impl(ctx):
     # # args.add("--silent")
 
     tools = [toolchain.gem]
+    java_home = ""
     if toolchain.version.startswith("jruby"):
         java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
         tools.extend(java_toolchain.java_runtime.files.to_list())

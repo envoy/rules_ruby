@@ -8,6 +8,8 @@ export LANG=en_US.UTF-8
 # Set environment variables.
 export PATH={toolchain_bindir}:$PATH
 export JAVA_HOME={java_home}
+export JAVA_OPTS=-Djdk.io.File.enableADS=true
+
 
 if [ '{gem}' = 'external/bundle/vendor/cache/bundler-2.2.19.gem' ]; then
   {gem_binary} \

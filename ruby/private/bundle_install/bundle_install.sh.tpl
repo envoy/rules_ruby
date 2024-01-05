@@ -31,6 +31,8 @@ export BUNDLE_SHEBANG={ruby_path}
 # export GEM_PATH={gem_path}
 export PATH={path}:$PATH
 
+export LANG=en_US.UTF-8
+
 external/bundle/vendor/cache/bundler-2.2.19/bundler/exe/bundle install --local
 
 # {bundler_path} --version

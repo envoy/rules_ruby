@@ -33,7 +33,7 @@ export PATH={path}:$PATH
 
 export LANG=en_US.UTF-8
 
-external/bundle/vendor/cache/bundler-2.2.19/bundler/exe/bundle install --local
+{ruby_path} {bundler_path} install --local
 
 # {bundler_path} --version
 # {bundler_path} _2.2.3_ --version

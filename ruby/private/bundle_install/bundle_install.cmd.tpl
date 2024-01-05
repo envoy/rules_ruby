@@ -14,6 +14,6 @@ REM set BUNDLE_USER_HOME={home_path}
 REM set GEM_PATH={gem_path}
 set PATH={path};%PATH%
 
-{bundler_path} install --local
+{ruby_path} {bundler_path} install --local
 
 :: vim: ft=dosbatch

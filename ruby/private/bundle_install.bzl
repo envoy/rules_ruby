@@ -26,11 +26,10 @@ def _rb_bundle_install_impl(ctx):
     tools = [toolchain.ruby, toolchain.bundle]
     bundler_path = toolchain.bundle.path
     # gem_path = ""
-    # for gem in ctx.attr.gems:
-    #     if gem[GemInfo].name == "bundler":
-    #         bundler_path = gem.files.to_list()[-1].path + "/bin/bundle"
-    #         gem_path = gem.files.to_list()[-1].path
-    #         tools.extend(gem.files.to_list())
+    for gem in ctx.attr.gems:
+        if gem[GemInfo].name == "bundler":
+            bundler_path = gem.files.to_list()[-1].path + "/bin/bundle"
+            tools.extend(gem.files.to_list())
 
     binstubs = ctx.actions.declare_directory("bin")
     bpath = ctx.actions.declare_directory("vendor/bundle")

@@ -73,7 +73,7 @@ def _rb_gem_install_impl(ctx):
 
     return [
         DefaultInfo(
-            files = depset([gem, install_dir] + ctx.files.data),
+            files = depset([gem, install_dir]),
         ),
         GemInfo(
             name = ctx.attr.name.rpartition("-")[0],

@@ -25,6 +25,7 @@ def _rb_bundle_install_impl(ctx):
 
     tools = [toolchain.ruby, toolchain.bundle]
     bundler_path = toolchain.bundle.path
+
     # gem_path = ""
     for gem in ctx.attr.gems:
         if gem[GemInfo].name == "bundler":
@@ -34,7 +35,7 @@ def _rb_bundle_install_impl(ctx):
     binstubs = ctx.actions.declare_directory("bin")
     bpath = ctx.actions.declare_directory("vendor/bundle")
     # home = ctx.actions.declare_directory("home")
-   
+
     if toolchain.version.startswith("jruby"):
         java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
         tools.extend(java_toolchain.java_runtime.files.to_list())

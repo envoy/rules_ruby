@@ -19,7 +19,7 @@ def _rb_gem_install_impl(ctx):
     # args.add("--local")
     # # args.add("--quiet")
     # # args.add("--silent")
-   
+
     tools = [toolchain.gem]
     if toolchain.version.startswith("jruby"):
         java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]

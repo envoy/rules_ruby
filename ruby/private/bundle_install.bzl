@@ -8,7 +8,8 @@ def _rb_bundle_install_impl(ctx):
 
     for gem in ctx.attr.gems:
         if gem[GemInfo].name == "bundler":
-            bundler_path = gem.files.to_list()[-1].path + "/bin/bundle"
+            full_name = "%s-%s" % (gem[GemInfo].name, gem[GemInfo].version)
+            bundler_path = gem.files.to_list()[-1].path + "/gems/" + full_name + "/exe/bundle"
             tools.extend(gem.files.to_list())
 
     binstubs = ctx.actions.declare_directory("bin")

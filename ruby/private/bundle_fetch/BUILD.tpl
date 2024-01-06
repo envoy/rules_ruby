@@ -13,6 +13,7 @@ rb_bundle_install(
 )
 
 {gem_fragments}
+
 {gem_install_fragments}
 
 # vim: ft=bzl

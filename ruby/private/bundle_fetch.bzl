@@ -8,7 +8,7 @@ rb_gem(
     src = "vendor/cache/{gem}",
 )
 """
- 
+
 _GEM_INSTALL_BUILD_FRAGMENT = """
 rb_gem_install(
     name = "{name}",

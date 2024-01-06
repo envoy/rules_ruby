@@ -97,9 +97,17 @@ bzl_library(
 )
 
 bzl_library(
+    name = "gem",
+    srcs = ["gem.bzl"],
+    visibility = ["//ruby:__subpackages__"],
+    deps = [":providers"],
+)
+
+bzl_library(
     name = "gem_install",
     srcs = ["gem_install.bzl"],
     visibility = ["//ruby:__subpackages__"],
+    deps = [":providers"],
 )
 
 bzl_library(

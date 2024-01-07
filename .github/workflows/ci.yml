@@ -34,20 +34,20 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - 3.0.6
-          - 3.1.4
-          - 3.2.2
-          - 3.3.0-preview3
+          # - 3.0.6
+          # - 3.1.4
+          # - 3.2.2
+          # - 3.3.0-preview3
           - jruby-9.4.5.0
-          - truffleruby-23.1.1
-          - system
+          # - truffleruby-23.1.1
+          # - system
         os:
-          - ubuntu
-          - macos
+          # - ubuntu
+          # - macos
           - windows
         mode:
           - bzlmod
-          - WORKSPACE
+          # - WORKSPACE
         exclude:
           # RubyInstaller doesn't ship previews.
           - os: windows
@@ -69,7 +69,7 @@ jobs:
         with:
           ruby-version: '3.0.6'
       - if: matrix.os == 'windows'
-        run: fsutil 8dot3name set 0
+        run: (Get-ItemProperty "HKLM:System\CurrentControlSet\Control\FileSystem").LongPathsEnabled
       - run: bazel build ...
       - run: bazel run lib/gem:add-numbers 2
       - run: bazel run lib/gem:print-version

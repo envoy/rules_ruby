@@ -40,7 +40,7 @@ def _rb_bundle_install_impl(ctx):
         script = ctx.actions.declare_file("{}.cmd".format(ctx.label.name))
         bundler_exe = bundler_exe.replace("/", "\\")
         template = ctx.file._bundle_install_cmd_tpl
-        env.update({"PATH": "%s:%PATH%" % path})
+        env.update({"PATH": "%s:\\%PATH\\%" % path})
     else:
         bundle_path = bpath.path
         gemfile_path = ctx.file.gemfile.path

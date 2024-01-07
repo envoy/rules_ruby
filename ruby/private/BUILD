@@ -85,18 +85,6 @@ bzl_library(
 )
 
 bzl_library(
-    name = "bundle",
-    srcs = ["bundle.bzl"],
-    visibility = ["//ruby:__subpackages__"],
-)
-
-bzl_library(
-    name = "download",
-    srcs = ["download.bzl"],
-    visibility = ["//ruby:__subpackages__"],
-)
-
-bzl_library(
     name = "gem",
     srcs = ["gem.bzl"],
     visibility = ["//ruby:__subpackages__"],
@@ -111,7 +99,25 @@ bzl_library(
 )
 
 bzl_library(
+    name = "bundle",
+    srcs = ["bundle.bzl"],
+    visibility = ["//ruby:__subpackages__"],
+)
+
+bzl_library(
+    name = "download",
+    srcs = ["download.bzl"],
+    visibility = ["//ruby:__subpackages__"],
+)
+
+bzl_library(
     name = "providers",
     srcs = ["providers.bzl"],
+    visibility = ["//ruby:__subpackages__"],
+)
+
+bzl_library(
+    name = "utils",
+    srcs = ["utils.bzl"],
     visibility = ["//ruby:__subpackages__"],
 )

@@ -1,11 +1,10 @@
 @echo off
 
-set PATH={toolchain_bindir};%PATH%
-set JAVA_HOME={java_home}
-set JAVA_OPTS=-Djdk.io.File.enableADS=true
+{env}
 
 {gem_binary} ^
-  install {gem} ^
+  install ^
+  {gem} ^
   --wrappers ^
   --ignore-dependencies ^
   --local ^

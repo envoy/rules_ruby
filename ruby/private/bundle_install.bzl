@@ -1,36 +1,46 @@
 load("//ruby/private:providers.bzl", "BundlerInfo", "GemInfo", "RubyFilesInfo")
+load(
+    "//ruby/private:utils.bzl",
+    _environment_commands = "environment_commands",
+    _is_windows = "is_windows",
+)
 
 def _rb_bundle_install_impl(ctx):
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
 
+    env = {}
     tools = [toolchain.ruby, toolchain.bundle]
-    bundler_path = toolchain.bundle.path
+    bundler_exe = toolchain.bundle.path
 
     for gem in ctx.attr.gems:
         if gem[GemInfo].name == "bundler":
             full_name = "%s-%s" % (gem[GemInfo].name, gem[GemInfo].version)
-            bundler_path = gem.files.to_list()[-1].path + "/gems/" + full_name + "/exe/bundle"
+            bundler_exe = gem.files.to_list()[-1].path + "/gems/" + full_name + "/exe/bundle"
             tools.extend(gem.files.to_list())
 
     binstubs = ctx.actions.declare_directory("bin")
     bpath = ctx.actions.declare_directory("vendor/bundle")
 
-    java_home = ""
     if toolchain.version.startswith("jruby"):
         java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
         tools.extend(java_toolchain.java_runtime.files.to_list())
         java_home = java_toolchain.java_runtime.java_home
+        env.update({
+            "JAVA_HOME": java_home,
+            "JAVA_OPTS": "-Djdk.io.File.enableADS=true",
+        })
+    elif toolchain.version.startswith("truffleruby"):
+        env.update({"LANG": "en_US.UTF-8"})
 
-    windows_constraint = ctx.attr._windows_constraint[platform_common.ConstraintValueInfo]
-    is_windows = ctx.target_platform_has_constraint(windows_constraint)
-    if is_windows:
+    if _is_windows(ctx):
         bundle_path = bpath.path.replace("/", "\\")
         gemfile_path = ctx.file.gemfile.path.replace("/", "\\")
         path = toolchain.bindir.replace("/", "\\")
         ruby_path = toolchain.ruby.path.replace("/", "\\")
         script = ctx.actions.declare_file("{}.cmd".format(ctx.label.name))
-        bundler_path = bundler_path.replace("/", "\\")
+        bundler_exe = bundler_exe.replace("/", "\\")
         template = ctx.file._bundle_install_cmd_tpl
+        env.update({"PATH": "%s:%PATH%" % path})
     else:
         bundle_path = bpath.path
         gemfile_path = ctx.file.gemfile.path
@@ -38,18 +48,26 @@ def _rb_bundle_install_impl(ctx):
         ruby_path = toolchain.ruby.path
         script = ctx.actions.declare_file("{}.sh".format(ctx.label.name))
         template = ctx.file._bundle_install_sh_tpl
+        env.update({"PATH": "%s:$PATH" % path})
+
+    env.update({
+        "BUNDLE_BIN": "../../%s" % binstubs.path,
+        "BUNDLE_DEPLOYMENT": "1",
+        "BUNDLE_DISABLE_SHARED_GEMS": "1",
+        "BUNDLE_DISABLE_VERSION_CHECK": "1",
+        "BUNDLE_GEMFILE": gemfile_path,
+        "BUNDLE_IGNORE_CONFIG": "1",
+        "BUNDLE_PATH": "../../%s" % bundle_path,
+        "BUNDLE_SHEBANG": ruby_path,
+    })
 
     ctx.actions.expand_template(
         template = template,
         output = script,
         substitutions = {
-            "{binstubs_path}": "../../" + binstubs.path,
-            "{bundle_path}": "../../" + bundle_path,
-            "{gemfile_path}": gemfile_path,
-            "{bundler_path}": bundler_path,
+            "{env}": _environment_commands(ctx, env),
+            "{bundler_exe}": bundler_exe,
             "{ruby_path}": ruby_path,
-            "{path}": path,
-            "{java_home}": java_home,
         },
     )
 

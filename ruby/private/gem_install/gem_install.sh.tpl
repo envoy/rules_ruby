@@ -1,18 +1,10 @@
 #!/usr/bin/env bash
 
-
-# ctx.actions.run("gem", "install"...) doesn't work for JRuby
-#
-export LANG=en_US.UTF-8
-
-# Set environment variables.
-export PATH={toolchain_bindir}:$PATH
-export JAVA_HOME={java_home}
-export JAVA_OPTS=-Djdk.io.File.enableADS=true
-
+{env}
 
 {gem_binary} \
-  install {gem} \
+  install \
+  {gem} \
   --wrappers \
   --ignore-dependencies \
   --local \

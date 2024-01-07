@@ -11,7 +11,13 @@ load(
     "get_transitive_runfiles",
     "get_transitive_srcs",
 )
-load("//ruby/private/binary:rlocation.bzl", "BASH_RLOCATION_FUNCTION", "BATCH_RLOCATION_FUNCTION")
+load(
+    "//ruby/private:utils.bzl",
+    "BASH_RLOCATION_FUNCTION",
+    "BATCH_RLOCATION_FUNCTION",
+    _environment_commands = "environment_commands",
+    _is_windows = "is_windows",
+)
 
 ATTRS = {
     "main": attr.label(
@@ -48,14 +54,8 @@ Use a built-in `args` attribute to pass extra arguments to the script.
     ),
 }
 
-_EXPORT_ENV_VAR_COMMAND = "{command} {name}={value}"
-_EXPORT_BATCH_COMMAND = "set"
-_EXPORT_BASH_COMMAND = "export"
-
 # buildifier: disable=function-docstring
 def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {}, java_bin = ""):
-    windows_constraint = ctx.attr._windows_constraint[platform_common.ConstraintValueInfo]
-    is_windows = ctx.target_platform_has_constraint(windows_constraint)
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
     toolchain_bindir = toolchain.bindir
 
@@ -64,15 +64,13 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
     else:
         binary_path = ""
 
-    if is_windows:
+    if _is_windows(ctx):
         binary_path = binary_path.replace("/", "\\")
-        export_command = _EXPORT_BATCH_COMMAND
         rlocation_function = BATCH_RLOCATION_FUNCTION
         script = ctx.actions.declare_file("{}.rb.cmd".format(ctx.label.name))
         toolchain_bindir = toolchain_bindir.replace("/", "\\")
         template = ctx.file._binary_cmd_tpl
     else:
-        export_command = _EXPORT_BASH_COMMAND
         rlocation_function = BASH_RLOCATION_FUNCTION
         script = ctx.actions.declare_file("{}.rb.sh".format(ctx.label.name))
         template = ctx.file._binary_sh_tpl
@@ -85,11 +83,6 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
     args = " ".join(args)
     args = ctx.expand_location(args)
 
-    environment = []
-    for (name, value) in env.items():
-        command = _EXPORT_ENV_VAR_COMMAND.format(command = export_command, name = name, value = value)
-        environment.append(command)
-
     ctx.actions.expand_template(
         template = template,
         output = script,
@@ -98,7 +91,7 @@ def generate_rb_binary_script(ctx, binary, bundler = False, args = [], env = {},
             "{args}": args,
             "{binary}": binary_path,
             "{toolchain_bindir}": toolchain_bindir,
-            "{env}": "\n".join(environment),
+            "{env}": _environment_commands(ctx, env),
             "{bundler_command}": bundler_command,
             "{ruby_binary_name}": toolchain.ruby.basename,
             "{java_bin}": java_bin,

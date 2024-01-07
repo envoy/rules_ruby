@@ -10,11 +10,10 @@ load(
     "get_transitive_deps",
     "get_transitive_srcs",
 )
+load("//ruby/private:utils.bzl", _is_windows = "is_windows")
 
 def _rb_gem_build_impl(ctx):
     env = {}
-    windows_constraint = ctx.attr._windows_constraint[platform_common.ConstraintValueInfo]
-    is_windows = ctx.target_platform_has_constraint(windows_constraint)
     tools = depset([])
 
     gem_builder = ctx.actions.declare_file("{}_gem_builder.rb".format(ctx.label.name))
@@ -28,7 +27,7 @@ def _rb_gem_build_impl(ctx):
     if ruby_toolchain.version.startswith("jruby"):
         env["JAVA_HOME"] = java_toolchain.java_runtime.java_home
         tools = java_toolchain.java_runtime.files
-        if is_windows:
+        if _is_windows(ctx):
             env["PATH"] = ruby_toolchain.ruby.dirname
 
     # Inputs manifest is a dictionary where:
@@ -64,7 +63,7 @@ def _rb_gem_build_impl(ctx):
         arguments = [args],
         outputs = [ctx.outputs.gem],
         env = env,
-        use_default_shell_env = not is_windows,
+        use_default_shell_env = not _is_windows(ctx),
         tools = tools,
     )
 

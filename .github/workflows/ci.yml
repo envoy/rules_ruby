@@ -35,7 +35,9 @@ jobs:
       matrix:
         ruby:
           # - 3.0.6
-          # - 3.1.4
+          # - 3.
+          startup --output_base=${config.paths.bazelOutputBase}\n
+          .4
           # - 3.2.2
           # - 3.3.0-preview3
           - jruby-9.4.5.0
@@ -62,14 +64,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: p0deje/setup-bazel@0.3.2
         with:
-          bazelrc: common --announce_rc --color=yes ${{ matrix.mode == 'bzlmod' && '--enable_bzlmod' || '' }}
+          bazelrc:
+            startup --output_base=D:/b
+            common --announce_rc --color=yes ${{ matrix.mode == 'bzlmod' && '--enable_bzlmod' || '' }}
       - run: echo ${{ matrix.ruby }} > .ruby-version
       - if: matrix.ruby == 'system'
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.0.6'
-      - if: matrix.os == 'windows'
-        run: (Get-ItemProperty "HKLM:System\CurrentControlSet\Control\FileSystem").LongPathsEnabled
       - run: bazel build ...
       - run: bazel run lib/gem:add-numbers 2
       - run: bazel run lib/gem:print-version

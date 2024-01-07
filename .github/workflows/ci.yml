@@ -35,9 +35,7 @@ jobs:
       matrix:
         ruby:
           # - 3.0.6
-          # - 3.
-          startup --output_base=${config.paths.bazelOutputBase}\n
-          .4
+          # - 3.1.4
           # - 3.2.2
           # - 3.3.0-preview3
           - jruby-9.4.5.0

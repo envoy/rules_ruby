@@ -68,7 +68,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.0.6'
-      - if: matrix.os == 'windows':
+      - if: matrix.os == 'windows'
         run: fsutil 8dot3name set 0
       - run: bazel build ...
       - run: bazel run lib/gem:add-numbers 2

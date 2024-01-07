@@ -37,16 +37,16 @@ def _rb_bundle_install_impl(ctx):
         gemfile_path = ctx.file.gemfile.path.replace("/", "\\")
         path = toolchain.bindir.replace("/", "\\")
         ruby_path = toolchain.ruby.path.replace("/", "\\")
-        script = ctx.actions.declare_file("{}.cmd".format(ctx.label.name))
+        script = ctx.actions.declare_file("bundle_install_{}.cmd".format(ctx.label.name))
         bundler_exe = bundler_exe.replace("/", "\\")
         template = ctx.file._bundle_install_cmd_tpl
-        env.update({"PATH": "%s:\\%PATH\\%" % path})
+        env.update({"PATH": path + ":%PATH%"})
     else:
         bundle_path = bpath.path
         gemfile_path = ctx.file.gemfile.path
         path = toolchain.bindir
         ruby_path = toolchain.ruby.path
-        script = ctx.actions.declare_file("{}.sh".format(ctx.label.name))
+        script = ctx.actions.declare_file("bundle_install_{}.sh".format(ctx.label.name))
         template = ctx.file._bundle_install_sh_tpl
         env.update({"PATH": "%s:$PATH" % path})
 

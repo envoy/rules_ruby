@@ -29,7 +29,7 @@ def _rb_gem_install_impl(ctx):
         gem_binary = toolchain.gem.path.replace("/", "\\")
         gem_install = ctx.actions.declare_file("gem_install_{}.cmd".format(ctx.label.name))
         template = ctx.file._gem_install_cmd_tpl
-        env.update({"PATH": "%s:\\%PATH\\%" % toolchain_bindir})
+        env.update({"PATH": toolchain_bindir + ":%PATH%"})
     else:
         toolchain_bindir = toolchain.bindir
         gem_binary = toolchain.gem.path

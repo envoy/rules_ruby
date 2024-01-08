@@ -141,10 +141,6 @@ rb_bundle_install = rule(
         "_windows_constraint": attr.label(
             default = "@platforms//os:windows",
         ),
-        "_prepare_bundle_path_tpl": attr.label(
-            allow_single_file = True,
-            default = "@rules_ruby//ruby/private:bundle_install/prepare_bundle_path.rb.tpl",
-        ),
     },
     toolchains = [
         "@rules_ruby//ruby:toolchain_type",

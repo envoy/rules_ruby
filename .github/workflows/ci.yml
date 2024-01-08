@@ -34,21 +34,25 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          # - 3.0.6
-          # - 3.1.4
-          # - 3.2.2
-          # - 3.3.0
+          - 3.0.6
+          - 3.1.4
+          - 3.2.2
+          - 3.3.0
           - jruby-9.4.5.0
-          # - truffleruby-23.1.1
-          # - system
+          - truffleruby-23.1.1
+          - system
         os:
-          # - ubuntu
-          # - macos
+          - ubuntu
+          - macos
           - windows
         mode:
           - bzlmod
-          # - WORKSPACE
+          - WORKSPACE
         exclude:
+          # JRuby with bzlmod fails with long path issues on Windows.
+          - os: windows
+            ruby: jruby-9.4.5.0
+            mode: bzlmod
           # TruffleRuby doesn't work on Windows.
           - os: windows
             ruby: truffleruby-23.1.1

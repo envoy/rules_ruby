@@ -14,7 +14,7 @@ ruby_bundle = tag_class(attrs = {
 ruby_bundle_fetch = tag_class(attrs = {
     "name": attr.string(doc = "Resulting repository name for the bundle"),
     "srcs": attr.label_list(),
-    # "env": attr.string_dict(),
+    "env": attr.string_dict(),
     "gemfile": attr.label(),
     "gemfile_lock": attr.label(),
 })
@@ -41,7 +41,7 @@ def _ruby_module_extension(module_ctx):
             rb_bundle_fetch(
                 name = bundle_fetch.name,
                 srcs = bundle_fetch.srcs,
-                # env = bundle_fetch.env,
+                env = bundle_fetch.env,
                 gemfile = bundle_fetch.gemfile,
                 gemfile_lock = bundle_fetch.gemfile_lock,
             )

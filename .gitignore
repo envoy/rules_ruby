@@ -3,3 +3,4 @@ bazel-gem
 bazel-out
 bazel-rules_ruby
 bazel-testlogs
+examples/gem/MODULE.bazel.lock

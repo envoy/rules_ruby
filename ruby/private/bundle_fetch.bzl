@@ -45,7 +45,7 @@ def _cleanup_downloads(repository_ctx, gem):
 def _join_and_indent(names):
     return "[\n        " + "\n        ".join(['"%s",' % name for name in names]) + "\n    ]"
 
-def _normalize_bzlmod_repositor_name(name):
+def _normalize_bzlmod_repository_name(name):
     return name.rpartition("~")[-1]
 
 def _rb_bundle_fetch_impl(repository_ctx):
@@ -83,11 +83,12 @@ def _rb_bundle_fetch_impl(repository_ctx):
         repository_ctx.attr._build_tpl,
         executable = False,
         substitutions = {
-            "{name}": _normalize_bzlmod_repositor_name(repository_ctx.name),
+            "{name}": _normalize_bzlmod_repository_name(repository_ctx.name),
             "{srcs}": _join_and_indent(srcs),
             "{gems}": _join_and_indent(gem_full_names),
             "{gem_fragments}": "".join(gem_fragments),
             "{gem_install_fragments}": "".join(gem_install_fragments),
+            "{env}": repr(repository_ctx.attr.env),
         },
     )
 
@@ -96,7 +97,7 @@ def _rb_bundle_fetch_impl(repository_ctx):
         repository_ctx.attr._bin_build_tpl,
         executable = False,
         substitutions = {
-            "{name}": _normalize_bzlmod_repositor_name(repository_ctx.name),
+            "{name}": _normalize_bzlmod_repository_name(repository_ctx.name),
         },
     )
 
@@ -118,9 +119,9 @@ rb_bundle_fetch = repository_rule(
             allow_single_file = ["Gemfile.lock"],
             doc = "Gemfile to install dependencies from.",
         ),
-        # "env": attr.string_dict(
-        #     doc = "Environment variables to use during installation.",
-        # ),
+        "env": attr.string_dict(
+            doc = "Environment variables to use during installation.",
+        ),
         "_build_tpl": attr.label(
             allow_single_file = True,
             default = "@rules_ruby//:ruby/private/bundle_fetch/BUILD.tpl",

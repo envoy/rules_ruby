@@ -18,9 +18,9 @@ ruby.bundle_fetch(
         "//:gem.gemspec",
         "//:lib/gem/version.rb",
     ],
-    # env = {
-    #     "BUNDLE_BUILD__FOO": "bar",
-    # },
+    env = {
+        "BUNDLE_BUILD__FOO": "bar",
+    },
     gemfile = "//:Gemfile",
     gemfile_lock = "//:Gemfile.lock",
 )

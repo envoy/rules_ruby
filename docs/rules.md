@@ -164,7 +164,7 @@ rake, version 10.5.0
 ## rb_bundle_install
 
 <pre>
-rb_bundle_install(<a href="#rb_bundle_install-name">name</a>, <a href="#rb_bundle_install-gemfile">gemfile</a>, <a href="#rb_bundle_install-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_install-gems">gems</a>, <a href="#rb_bundle_install-srcs">srcs</a>)
+rb_bundle_install(<a href="#rb_bundle_install-name">name</a>, <a href="#rb_bundle_install-env">env</a>, <a href="#rb_bundle_install-gemfile">gemfile</a>, <a href="#rb_bundle_install-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_install-gems">gems</a>, <a href="#rb_bundle_install-srcs">srcs</a>)
 </pre>
 
 
@@ -175,6 +175,7 @@ rb_bundle_install(<a href="#rb_bundle_install-name">name</a>, <a href="#rb_bundl
 | Name  | Description | Type | Mandatory | Default |
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="rb_bundle_install-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="rb_bundle_install-env"></a>env |  Environment variables to use during installation.   | <a href="https://bazel.build/rules/lib/dict">Dictionary: String -> String</a> | optional | <code>{}</code> |
 | <a id="rb_bundle_install-gemfile"></a>gemfile |  Gemfile to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="rb_bundle_install-gemfile_lock"></a>gemfile_lock |  Gemfile to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
 | <a id="rb_bundle_install-gems"></a>gems |  List of runtime dependencies needed by a program that depends on this library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |

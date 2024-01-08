@@ -6,7 +6,7 @@ RubyFilesInfo = provider(
 
 BundlerInfo = provider(
     "Provider for Bundler installation",
-    fields = ["bin", "gemfile", "cache", "path"],
+    fields = ["bin", "gemfile", "cache", "path", "env"],
 )
 
 GemInfo = provider(
@@ -89,9 +89,10 @@ def get_bundle_env(envs, deps):
     transitive_deps = get_transitive_deps(deps).to_list()
     for dep in transitive_deps:
         bundle_env.update(dep[RubyFilesInfo].bundle_env)
+        if BundlerInfo in dep:
+            bundle_env.update(dep[BundlerInfo].env)
 
     for env in envs:
         if env.startswith("BUNDLE_"):
             bundle_env[env] = envs[env]
-
     return bundle_env

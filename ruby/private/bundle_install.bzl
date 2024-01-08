@@ -24,6 +24,7 @@ def _rb_bundle_install_impl(ctx):
 
     env = {}
     env.update(toolchain.env)
+    env.update(ctx.attr.env)
     if toolchain.version.startswith("jruby"):
         java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
         tools.extend(java_toolchain.java_runtime.files.to_list())
@@ -37,7 +38,7 @@ def _rb_bundle_install_impl(ctx):
         script = ctx.actions.declare_file("bundle_install_{}.cmd".format(ctx.label.name))
         bundler_exe = bundler_exe.replace("/", "\\")
         template = ctx.file._bundle_install_cmd_tpl
-        env.update({"PATH": path + ":%PATH%"})
+        env.update({"PATH": path + ";%PATH%"})
     else:
         bundle_path = bpath.path
         gemfile_path = ctx.file.gemfile.path
@@ -96,9 +97,9 @@ def _rb_bundle_install_impl(ctx):
         ),
         BundlerInfo(
             bin = binstubs,
+            env = ctx.attr.env,
             gemfile = ctx.file.gemfile,
             path = bpath,
-            # vendor = vendor,
         ),
     ]
 
@@ -120,6 +121,9 @@ rb_bundle_install = rule(
         "gems": attr.label_list(
             allow_files = True,
             doc = "List of runtime dependencies needed by a program that depends on this library.",
+        ),
+        "env": attr.string_dict(
+            doc = "Environment variables to use during installation.",
         ),
         "_runfiles_library": attr.label(
             allow_single_file = True,

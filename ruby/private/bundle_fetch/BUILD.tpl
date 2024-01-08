@@ -7,6 +7,7 @@ package(default_visibility = ["//visibility:public"])
 rb_bundle_install(
     name = "{name}",
     srcs = {srcs},
+    env = {env},
     gemfile = "Gemfile",
     gemfile_lock = "Gemfile.lock",
     gems = {gems},

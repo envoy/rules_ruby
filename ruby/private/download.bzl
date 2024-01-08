@@ -112,6 +112,13 @@ def _install_via_rubyinstaller(repository_ctx, version):
         if result.return_code != 0:
             fail("%s\n%s" % (result.stdout, result.stderr))
 
+    binpath = repository_ctx.path("dist/bin")
+    if not binpath.get_child("bundle.cmd").exists:
+        repository_ctx.symlink(
+            "{}/bundle.bat".format(binpath),
+            "{}/bundle.cmd".format(binpath),
+        )
+
 def _install_via_ruby_build(repository_ctx, version):
     repository_ctx.report_progress("Downloading ruby-build %s" % repository_ctx.attr.ruby_build_version)
     repository_ctx.download_and_extract(

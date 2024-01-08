@@ -3,7 +3,6 @@ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 exports_files([
     "bundle_install/bundle_install.cmd.tpl",
     "bundle_install/bundle_install.sh.tpl",
-    "bundle_install/prepare_bundle_path.rb.tpl",
     "gem_build/gem_builder.rb.tpl",
     "gem_install/gem_install.cmd.tpl",
     "gem_install/gem_install.sh.tpl",
@@ -16,6 +15,7 @@ bzl_library(
     deps = [
         ":library",
         ":providers",
+        ":utils",
     ],
 )
 
@@ -26,6 +26,7 @@ bzl_library(
     deps = [
         ":library",
         ":providers",
+        ":utils",
     ],
 )
 
@@ -80,6 +81,7 @@ bzl_library(
     deps = [
         ":gem_install",
         ":providers",
+        ":utils",
     ],
 )
 
@@ -94,7 +96,10 @@ bzl_library(
     name = "gem_install",
     srcs = ["gem_install.bzl"],
     visibility = ["//ruby:__subpackages__"],
-    deps = [":providers"],
+    deps = [
+        ":providers",
+        ":utils",
+    ],
 )
 
 bzl_library(

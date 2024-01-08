@@ -1,3 +1,5 @@
+"Implementation details for rb_gem_install"
+
 load("//ruby/private:providers.bzl", "GemInfo")
 load(
     "//ruby/private:utils.bzl",

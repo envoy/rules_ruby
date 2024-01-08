@@ -1,3 +1,5 @@
+"Implementation details for rb_gem"
+
 load("//ruby/private:providers.bzl", "GemInfo")
 
 def _rb_gem_impl(ctx):

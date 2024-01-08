@@ -159,6 +159,47 @@ rake, version 10.5.0
 | <a id="rb_binary-srcs"></a>srcs |  List of Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 
 
+<a id="rb_bundle_install"></a>
+
+## rb_bundle_install
+
+<pre>
+rb_bundle_install(<a href="#rb_bundle_install-name">name</a>, <a href="#rb_bundle_install-gemfile">gemfile</a>, <a href="#rb_bundle_install-gemfile_lock">gemfile_lock</a>, <a href="#rb_bundle_install-gems">gems</a>, <a href="#rb_bundle_install-srcs">srcs</a>)
+</pre>
+
+
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="rb_bundle_install-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="rb_bundle_install-gemfile"></a>gemfile |  Gemfile to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
+| <a id="rb_bundle_install-gemfile_lock"></a>gemfile_lock |  Gemfile to install dependencies from.   | <a href="https://bazel.build/concepts/labels">Label</a> | optional | <code>None</code> |
+| <a id="rb_bundle_install-gems"></a>gems |  List of runtime dependencies needed by a program that depends on this library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
+| <a id="rb_bundle_install-srcs"></a>srcs |  List of Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
+
+
+<a id="rb_gem"></a>
+
+## rb_gem
+
+<pre>
+rb_gem(<a href="#rb_gem-name">name</a>, <a href="#rb_gem-src">src</a>)
+</pre>
+
+
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="rb_gem-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="rb_gem-src"></a>src |  Gem file.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
+
+
 <a id="rb_gem_build"></a>
 
 ## rb_gem_build
@@ -262,6 +303,25 @@ INFO: Build completed successfully, 2 total actions
 | <a id="rb_gem_build-deps"></a>deps |  List of other Ruby libraries the target depends on.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
 | <a id="rb_gem_build-gemspec"></a>gemspec |  Gemspec file to use for gem building.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 | <a id="rb_gem_build-srcs"></a>srcs |  List of Ruby source files used to build the library.   | <a href="https://bazel.build/concepts/labels">List of labels</a> | optional | <code>[]</code> |
+
+
+<a id="rb_gem_install"></a>
+
+## rb_gem_install
+
+<pre>
+rb_gem_install(<a href="#rb_gem_install-name">name</a>, <a href="#rb_gem_install-src">src</a>)
+</pre>
+
+
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="rb_gem_install-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/concepts/labels#target-names">Name</a> | required |  |
+| <a id="rb_gem_install-src"></a>src |  Gem file to install.   | <a href="https://bazel.build/concepts/labels">Label</a> | required |  |
 
 
 <a id="rb_gem_push"></a>

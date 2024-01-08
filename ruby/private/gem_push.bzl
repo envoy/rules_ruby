@@ -1,4 +1,4 @@
-"Implementation details for gem_push"
+"Implementation details for rb_gem_push"
 
 load("//ruby/private:binary.bzl", "generate_rb_binary_script", BINARY_ATTRS = "ATTRS")
 load("//ruby/private:library.bzl", LIBRARY_ATTRS = "ATTRS")

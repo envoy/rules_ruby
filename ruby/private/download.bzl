@@ -4,11 +4,6 @@ _JRUBY_BINARY_URL = "https://repo1.maven.org/maven2/org/jruby/jruby-dist/{versio
 _RUBY_BUILD_URL = "https://github.com/rbenv/ruby-build/archive/refs/tags/v{version}.tar.gz"
 _RUBY_INSTALLER_URL = "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-{version}-1/rubyinstaller-devkit-{version}-1-x64.exe"
 
-# Common packages necessary on Windows.
-_MSYS2_PACKAGES = [
-    "libyaml",  # depedency of psych
-]
-
 def _rb_download_impl(repository_ctx):
     if repository_ctx.attr.version and not repository_ctx.attr.version_file:
         version = repository_ctx.attr.version

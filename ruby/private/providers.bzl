@@ -5,10 +5,12 @@ RubyFilesInfo = provider(
 )
 
 BundlerInfo = provider(
+    "Provider for Bundler installation",
     fields = ["bin", "gemfile", "cache", "path"],
 )
 
 GemInfo = provider(
+    "Provider for a packed Ruby gem",
     fields = ["name", "version"],
 )
 

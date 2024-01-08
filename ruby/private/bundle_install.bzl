@@ -1,3 +1,5 @@
+"Implementation details for rb_bundle_install"
+
 load("//ruby/private:providers.bzl", "BundlerInfo", "GemInfo", "RubyFilesInfo")
 load(
     "//ruby/private:utils.bzl",

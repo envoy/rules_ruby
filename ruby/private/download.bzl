@@ -4,6 +4,11 @@ _JRUBY_BINARY_URL = "https://repo1.maven.org/maven2/org/jruby/jruby-dist/{versio
 _RUBY_BUILD_URL = "https://github.com/rbenv/ruby-build/archive/refs/tags/v{version}.tar.gz"
 _RUBY_INSTALLER_URL = "https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-{version}-1/rubyinstaller-devkit-{version}-1-x64.exe"
 
+# Common packages necessary on Windows.
+_MSYS2_PACKAGES = [
+    "libyaml",  # depedency of psych
+]
+
 def _rb_download_impl(repository_ctx):
     if repository_ctx.attr.version and not repository_ctx.attr.version_file:
         version = repository_ctx.attr.version
@@ -94,20 +99,23 @@ def _install_via_rubyinstaller(repository_ctx, version):
     if result.return_code != 0:
         fail("%s\n%s" % (result.stdout, result.stderr))
 
-    result = repository_ctx.execute(["./dist/bin/ridk.cmd", "exec", "pacman", "-S", "--noconfirm", "mingw-w64-x86_64-libyaml"])
-    if result.return_code != 0:
-        fail("%s\n%s" % (result.stdout, result.stderr))
+    if len(repository_ctx.attr.msys2_packages) > 0:
+        mingw_package_prefix = None
+        result = repository_ctx.execute([
+            "./dist/bin/ruby.exe",
+            "-rruby_installer",
+            "-e",
+            "puts RubyInstaller::Runtime::Msys2Installation.new.mingw_package_prefix",
+        ])
+        if result.return_code != 0:
+            fail("%s\n%s" % (result.stdout, result.stderr))
+        else:
+            mingw_package_prefix = result.stdout.strip()
 
-    result = repository_ctx.execute(["./dist/bin/ridk.cmd", "exec", "pacman", "-S", "--noconfirm", "mingw-w64-ucrt-x86_64-libyaml"])
-    if result.return_code != 0:
-        fail("%s\n%s" % (result.stdout, result.stderr))
-
-    binpath = repository_ctx.path("dist/bin")
-    if not binpath.get_child("bundle.cmd").exists:
-        repository_ctx.symlink(
-            "{}/bundle.bat".format(binpath),
-            "{}/bundle.cmd".format(binpath),
-        )
+        packages = ["%s-%s" % (mingw_package_prefix, package) for package in repository_ctx.attr.msys2_packages]
+        result = repository_ctx.execute(["./dist/bin/ridk.cmd", "exec", "pacman", "--sync", "--noconfirm"] + packages)
+        if result.return_code != 0:
+            fail("%s\n%s" % (result.stdout, result.stderr))
 
 def _install_via_ruby_build(repository_ctx, version):
     repository_ctx.report_progress("Downloading ruby-build %s" % repository_ctx.attr.ruby_build_version)
@@ -144,6 +152,14 @@ rb_download = repository_rule(
         "version_file": attr.label(
             allow_single_file = [".ruby-version"],
             doc = "File to read Ruby version from.",
+        ),
+        "msys2_packages": attr.string_list(
+            default = ["libyaml"],
+            doc = """
+Extra MSYS2 packages to install.
+
+By default, contains `libyaml` (dependency of a `psych` gem).
+""",
         ),
         "ruby_build_version": attr.string(
             default = "20231225",

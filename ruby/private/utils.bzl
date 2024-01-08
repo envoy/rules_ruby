@@ -64,19 +64,24 @@ def is_windows(ctx):
     windows_constraint = ctx.attr._windows_constraint[platform_common.ConstraintValueInfo]
     return ctx.target_platform_has_constraint(windows_constraint)
 
-_EXPORT_ENV_VAR_COMMAND = "{command} {name}={value}"
-_EXPORT_BATCH_COMMAND = "set"
-_EXPORT_BASH_COMMAND = "export"
-
 def environment_commands(ctx, env):
-    if is_windows(ctx):
-        export_command = _EXPORT_BATCH_COMMAND
-    else:
-        export_command = _EXPORT_BASH_COMMAND
+    """Converts an env dictionary to a string of batch/shell commands.
 
+    Args:
+      ctx: rule context
+      env: dictionary of environment variables
+
+    Returns:
+      a string with export environment variables commands.
+    """
     environment = []
+    if is_windows(ctx):
+        export_command = "set"
+    else:
+        export_command = "export"
+
     for (name, value) in env.items():
-        command = _EXPORT_ENV_VAR_COMMAND.format(command = export_command, name = name, value = value)
+        command = "{command} {name}={value}".format(command = export_command, name = name, value = value)
         environment.append(command)
 
     return "\n".join(environment)

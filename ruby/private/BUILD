@@ -16,7 +16,6 @@ bzl_library(
     deps = [
         ":library",
         ":providers",
-        "//ruby/private/binary:rlocation",
     ],
 )
 

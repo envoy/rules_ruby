@@ -1,12 +1,15 @@
-# Largely stolen from https://github.com/sorbet/sorbet/blob/master/third_party/gems/gemfile.bzl.
-# Modifications include:
-# - Support for parsing out the bundler version.
-# - Support for parsing out GIT packages.
+"""
+Parses a Gemfile.lock purely in Starlark.
 
-def _parse_package(line):
-    """Parse an exact package specification from a single line of a Gemfile.lock."""
+Largely based on https://github.com/sorbet/sorbet/blob/master/third_party/gems/gemfile_parser.bzl (private)
+Modifications include:
+  - Support for parsing out the gem remote URL.
+  - Usage of structs with extra fields as return values.
+"""
 
-    """
+def _parse_package(line, remote):
+    """Parses an exact package specification from a single line of a Gemfile.lock.
+
     The Gemfile.lock format uses two spaces for each level of indentation. The
     lines that we're interested in are nested underneath the `GEM.specs`
     section (the concrete gems required and their exact versions).
@@ -17,11 +20,15 @@ def _parse_package(line):
 
     >    gem-name (gem-version)
 
-    What's returned is a dict that will have two fields:
+    What's returned is a strcut that will the following fields in this case:
 
-    > { "name": "gem-name", "version": "gem-version" }
-
-    in this case.
+    > struct(
+    >   name = "gem-name",
+    >   version = "gem-version",
+    >   full_name = "gem-name-gem-version",
+    >   filename = "gem-name-gem-version.gem",
+    >   remote = "https://rubygems.org"
+    > )
 
     If the line does not match that format, `None` is returned.
     """
@@ -46,12 +53,12 @@ def _parse_package(line):
         version = version,
         filename = "%s-%s.gem" % (package, version),
         full_name = "%s-%s" % (package, version),
-        # TODO: support getting remote from lockfile
-        remote = "https://rubygems.org/",
+        remote = remote,
     )
 
 def _parse_top_section(line):
-    """
+    """Parse a top-level section name.
+
     Returns a top-level section name ("PATH", "GEM", "PLATFORMS",
     "DEPENDENCIES", etc.), or `None` if the line is empty or contains leading
     space.
@@ -62,9 +69,21 @@ def _parse_top_section(line):
 
     return line
 
-def _parse_git_package(lines):
+def _parse_remote(line):
+    """Parse a remote URL for packages.
+
+    An example line is:
+    >   remote: https://rubygems.org/
     """
-    Parse a git specification from several lines of a Gemfile.lock.
+    prefix = "  remote: "
+    if line.startswith(prefix):
+        return line.removeprefix(prefix).strip()
+
+    return None
+
+def _parse_git_package(lines):
+    """Parse a Git specification from several lines of a Gemfile.lock.
+
     The relevant lines begin with either `remote` or `revision`.
 
     > remote: path:to/remote.git
@@ -93,14 +112,22 @@ def _parse_git_package(lines):
     return {"revision": revision, "remote": remote}
 
 def parse_gemfile_lock(content):
-    """
+    """Parses a Gemfile.lock.
+
     Find lines in the content of a Gemfile.lock that look like package
     constraints.
+
+    Args:
+        content: Gemfile.lock contents
+
+    Returns:
+        struct with parsed Gemfile.lock
     """
 
     remote_packages = []
     git_packages = []
     bundler = None
+    remote = None
 
     inside_gem = False
     inside_git = False
@@ -112,7 +139,9 @@ def parse_gemfile_lock(content):
         top_section = _parse_top_section(line)
         if top_section != None:
             # Toggle gem specification parsing.
-            inside_gem = (top_section == "GEM")
+            if top_section == "GEM":
+                inside_gem = True
+                remote = None
 
             # Toggle bundler version parsing. Skip to the next line which
             # has the actual version.
@@ -125,9 +154,12 @@ def parse_gemfile_lock(content):
 
         # Only parse gem specifications from the GEM section.
         if inside_gem:
-            info = _parse_package(line)
-            if info != None:
-                remote_packages.append(info)
+            if remote:
+                info = _parse_package(line, remote)
+                if info != None:
+                    remote_packages.append(info)
+            else:
+                remote = _parse_remote(line)
 
         # Only parse git specifications from the GIT section.
         if inside_git:

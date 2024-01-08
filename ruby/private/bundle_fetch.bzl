@@ -130,4 +130,40 @@ rb_bundle_fetch = repository_rule(
             default = "@rules_ruby//:ruby/private/bundle_fetch/bin/BUILD.tpl",
         ),
     },
+    doc = """
+Fetches Bundler dependencies to be automatically installed by other targets.
+
+Currently doesn't support installing gems from Git repositories.
+
+`WORKSPACE`:
+```bazel
+load("@rules_ruby//ruby:deps.bzl", "rb_bundle_fetch")
+
+rb_bundle_fetch(
+    name = "bundle",
+    gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock
+    srcs = [
+        "//:gem.gemspec",
+        "//:lib/gem/version.rb",
+    ]
+)
+```
+
+All the installed gems can be accessed using `@bundle` target and additionally
+gems binary files can also be used:
+
+`BUILD`:
+```bazel
+load("@rules_ruby//ruby:defs.bzl", "rb_binary")
+
+package(default_visibility = ["//:__subpackages__"])
+
+rb_binary(
+    name = "rubocop",
+    main = "@bundle//:bin/rubocop",
+    deps = ["@bundle"],
+)
+```
+    """,
 )

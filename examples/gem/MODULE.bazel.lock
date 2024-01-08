@@ -1296,7 +1296,7 @@
     },
     "@@rules_ruby~override//ruby:extensions.bzl%ruby": {
       "general": {
-        "bzlTransitiveDigest": "SZEjgHufK0qzO06/UGh/wPPXOKCOfqO7WlfC2DkEo+4=",
+        "bzlTransitiveDigest": "EKjo8xg1GOHBfvu6xN3Ub7Yoe1AKhHNfrsDj42Zc9o8=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {

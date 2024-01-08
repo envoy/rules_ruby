@@ -13,7 +13,6 @@ load(
 load("//ruby/private:utils.bzl", _is_windows = "is_windows")
 
 def _rb_gem_build_impl(ctx):
-    env = {}
     tools = depset([])
 
     gem_builder = ctx.actions.declare_file("{}_gem_builder.rb".format(ctx.label.name))
@@ -23,6 +22,9 @@ def _rb_gem_build_impl(ctx):
     bundle_env = get_bundle_env({}, ctx.attr.deps)
     java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
     ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
+
+    env = {}
+    env.update(ruby_toolchain.env)
 
     if ruby_toolchain.version.startswith("jruby"):
         env["JAVA_HOME"] = java_toolchain.java_runtime.java_home

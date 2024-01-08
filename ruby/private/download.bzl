@@ -30,6 +30,16 @@ def _rb_download_impl(repository_ctx):
         ruby_binary_name = "ruby"
         gem_binary_name = "gem"
 
+    env = {}
+    if version.startswith("jruby"):
+        # JRuby might fail with "Errno::EACCES: Permission denied - NUL" on Windows:
+        # https://github.com/jruby/jruby/issues/7182#issuecomment-1112953015
+        env.update({"JAVA_OPTS": "-Djdk.io.File.enableADS=true"})
+    elif version.startswith("truffleruby"):
+        # TruffleRuby needs explicit locale
+        # https://www.graalvm.org/dev/reference-manual/ruby/UTF8Locale/
+        env.update({"LANG": "en_US.UTF-8"})
+
     repository_ctx.template(
         "BUILD",
         repository_ctx.attr._build_tpl,
@@ -39,6 +49,7 @@ def _rb_download_impl(repository_ctx):
             "{version}": version,
             "{ruby_binary_name}": ruby_binary_name,
             "{gem_binary_name}": gem_binary_name,
+            "{env}": repr(env),
         },
     )
 

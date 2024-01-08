@@ -11,6 +11,41 @@ rb_bundle_fetch(<a href="#rb_bundle_fetch-name">name</a>, <a href="#rb_bundle_fe
 </pre>
 
 
+Fetches Bundler dependencies to be automatically installed by other targets.
+
+Currently doesn't support installing gems from Git repositories.
+
+`WORKSPACE`:
+```bazel
+load("@rules_ruby//ruby:deps.bzl", "rb_bundle_fetch")
+
+rb_bundle_fetch(
+    name = "bundle",
+    gemfile = "//:Gemfile",
+    gemfile_lock = "//:Gemfile.lock
+    srcs = [
+        "//:gem.gemspec",
+        "//:lib/gem/version.rb",
+    ]
+)
+```
+
+All the installed gems can be accessed using `@bundle` target and additionally
+gems binary files can also be used:
+
+`BUILD`:
+```bazel
+load("@rules_ruby//ruby:defs.bzl", "rb_binary")
+
+package(default_visibility = ["//:__subpackages__"])
+
+rb_binary(
+    name = "rubocop",
+    main = "@bundle//:bin/rubocop",
+    deps = ["@bundle"],
+)
+```
+    
 
 **ATTRIBUTES**
 
@@ -32,6 +67,8 @@ rb_bundle_fetch(<a href="#rb_bundle_fetch-name">name</a>, <a href="#rb_bundle_fe
 rb_bundle_rule(<a href="#rb_bundle_rule-name">name</a>, <a href="#rb_bundle_rule-env">env</a>, <a href="#rb_bundle_rule-gemfile">gemfile</a>, <a href="#rb_bundle_rule-repo_mapping">repo_mapping</a>, <a href="#rb_bundle_rule-srcs">srcs</a>, <a href="#rb_bundle_rule-toolchain">toolchain</a>)
 </pre>
 
+
+(Deprecated) Use `rb_bundle_fetch()` instead.
 
 Installs Bundler dependencies and registers an external repository
 that can be used by other targets.

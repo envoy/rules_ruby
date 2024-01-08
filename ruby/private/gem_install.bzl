@@ -13,25 +13,19 @@ def _rb_gem_install_impl(ctx):
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
 
     env = {}
+    env.update(toolchain.env)
     tools = [toolchain.gem]
-    java_home = ""
     if toolchain.version.startswith("jruby"):
         java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
         tools.extend(java_toolchain.java_runtime.files.to_list())
-        java_home = java_toolchain.java_runtime.java_home
-        env.update({
-            "JAVA_HOME": java_home,
-            "JAVA_OPTS": "-Djdk.io.File.enableADS=true",
-        })
-    elif toolchain.version.startswith("truffleruby"):
-        env.update({"LANG": "en_US.UTF-8"})
+        env.update({"JAVA_HOME": java_toolchain.java_runtime.java_home})
 
     if _is_windows(ctx):
         toolchain_bindir = toolchain.bindir.replace("/", "\\")
         gem_binary = toolchain.gem.path.replace("/", "\\")
         gem_install = ctx.actions.declare_file("gem_install_{}.cmd".format(ctx.label.name))
         template = ctx.file._gem_install_cmd_tpl
-        env.update({"PATH": toolchain_bindir + ":%PATH%"})
+        env.update({"PATH": toolchain_bindir + "z:%PATH%"})
     else:
         toolchain_bindir = toolchain.bindir
         gem_binary = toolchain.gem.path

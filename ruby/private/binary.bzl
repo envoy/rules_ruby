@@ -130,8 +130,8 @@ def rb_binary_impl(ctx):
 
     bundle_env = get_bundle_env(ctx.attr.env, ctx.attr.deps)
     env.update(bundle_env)
+    env.update(ruby_toolchain.env)
     env.update(ctx.attr.env)
-    env.update({"LANG": "en_US.UTF-8"})
 
     runfiles = ctx.runfiles(transitive_srcs + transitive_data + tools)
     runfiles = get_transitive_runfiles(runfiles, ctx.attr.srcs, ctx.attr.deps, ctx.attr.data)

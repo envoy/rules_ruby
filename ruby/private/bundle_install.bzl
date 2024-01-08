@@ -10,7 +10,6 @@ load(
 def _rb_bundle_install_impl(ctx):
     toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
 
-    env = {}
     tools = [toolchain.ruby, toolchain.bundle]
     bundler_exe = toolchain.bundle.path
 
@@ -23,16 +22,12 @@ def _rb_bundle_install_impl(ctx):
     binstubs = ctx.actions.declare_directory("bin")
     bpath = ctx.actions.declare_directory("vendor/bundle")
 
+    env = {}
+    env.update(toolchain.env)
     if toolchain.version.startswith("jruby"):
         java_toolchain = ctx.toolchains["@bazel_tools//tools/jdk:runtime_toolchain_type"]
         tools.extend(java_toolchain.java_runtime.files.to_list())
-        java_home = java_toolchain.java_runtime.java_home
-        env.update({
-            "JAVA_HOME": java_home,
-            "JAVA_OPTS": "-Djdk.io.File.enableADS=true",
-        })
-    elif toolchain.version.startswith("truffleruby"):
-        env.update({"LANG": "en_US.UTF-8"})
+        env.update({"JAVA_HOME": java_toolchain.java_runtime.java_home})
 
     if _is_windows(ctx):
         bundle_path = bpath.path.replace("/", "\\")

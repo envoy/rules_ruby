@@ -96,6 +96,8 @@ Gemfile to install dependencies from.
         ),
     },
     doc = """
+(Deprecated) Use `rb_bundle_fetch()` instead.
+
 Installs Bundler dependencies and registers an external repository
 that can be used by other targets.
 

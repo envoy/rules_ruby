@@ -61,18 +61,9 @@ jobs:
         working-directory: examples/gem
     steps:
       - uses: actions/checkout@v4
-      - uses: p0deje/setup-bazel@short-path-win
+      - uses: p0deje/setup-bazel@0.3.2
         with:
           bazelrc: common --announce_rc --color=yes ${{ matrix.mode == 'WORKSPACE' && '--noenable_bzlmod' || '' }}
-      - run: fsutil 8dot3name query C
-      - run: fsutil 8dot3name query D
-      - run: fsutil 8dot3name set 0
-      - run: fsutil 8dot3name query C
-      - run: fsutil 8dot3name query D
-      - run: fsutil 8dot3name set C 0
-      - run: fsutil 8dot3name set D 0
-      - run: fsutil 8dot3name query C
-      - run: fsutil 8dot3name query D
       - run: echo ${{ matrix.ruby }} > .ruby-version
       - if: matrix.ruby == 'system'
         uses: ruby/setup-ruby@v1

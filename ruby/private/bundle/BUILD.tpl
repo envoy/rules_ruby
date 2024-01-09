@@ -9,3 +9,9 @@ rb_library(
     data = glob(["**/*"]),
     bundle_env = BUNDLE_ENV,
 )
+
+rb_library(
+    name = "gems",
+    data = glob(["**/*"]),
+    bundle_env = BUNDLE_ENV,
+)

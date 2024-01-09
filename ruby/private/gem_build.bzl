@@ -15,6 +15,7 @@ def _rb_gem_build_impl(ctx):
     windows_constraint = ctx.attr._windows_constraint[platform_common.ConstraintValueInfo]
     is_windows = ctx.target_platform_has_constraint(windows_constraint)
     tools = depset([])
+    version = ctx.var.get("version", "0.0.0")
 
     gem_builder = ctx.actions.declare_file("{}_gem_builder.rb".format(ctx.label.name))
     transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps).to_list()
@@ -52,6 +53,7 @@ def _rb_gem_build_impl(ctx):
             "{gem_filename}": ctx.outputs.gem.basename,
             "{gemspec}": ctx.file.gemspec.path,
             "{inputs_manifest}": json.encode(inputs_manifest),
+            "{version}": version,
         },
     )
 

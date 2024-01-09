@@ -9,16 +9,21 @@ def _rb_gem_push_impl(ctx):
     ruby_toolchain = ctx.toolchains["@rules_ruby//ruby:toolchain_type"]
     srcs = [ctx.file.gem]
     tools = [ruby_toolchain.gem]
+    host = ctx.attr.repository
 
     if ruby_toolchain.version.startswith("jruby"):
         env["JAVA_HOME"] = java_toolchain.java_runtime.java_home
         tools.extend(java_toolchain.java_runtime.files.to_list())
 
+    args = ["push", ctx.file.gem.short_path]
+    if host:
+        args = ["push", "--host", host, ctx.file.gem.short_path]
+
     script = generate_rb_binary_script(
         ctx,
         binary = ruby_toolchain.gem,
         bundler = False,
-        args = ["push", ctx.file.gem.short_path],
+        args = args,
     )
 
     runfiles = ctx.runfiles(srcs + tools)
@@ -46,6 +51,9 @@ rb_gem_push = rule(
             doc = """
 Gem file to push to RubyGems. You would usually use an output of `rb_gem_build()` target here.
             """,
+        ),
+        repository = attr.string(
+            doc = "Remote repository to push to.",
         ),
         env = BINARY_ATTRS["env"],
         env_inherit = BINARY_ATTRS["env_inherit"],

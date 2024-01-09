@@ -6,6 +6,7 @@ require 'tmpdir'
 gemspec_path = '{gemspec}'
 packaged_gem_path = File.expand_path('{gem_filename}', '{bazel_out_dir}')
 inputs = JSON.parse('{inputs_manifest}')
+version = '{version}'
 
 # We need to check if there are inputs which are directories.
 # For such cases, we are going to check the contents of the directories
@@ -39,6 +40,7 @@ Dir.mktmpdir do |tmpdir|
 
     Dir.chdir(gemspec_dir) do
       spec = binding.eval(gemspec_code, gemspec_file, __LINE__)
+      spec.version = version
       file = Gem::Package.build(spec)
       FileUtils.mv(file, packaged_gem_path)
     end

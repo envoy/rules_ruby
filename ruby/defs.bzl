@@ -10,4 +10,5 @@ rb_binary = _rb_binary
 rb_gem_build = _rb_gem_build
 rb_gem_push = _rb_gem_push
 rb_library = _rb_library
+ruby_library = _rb_library
 rb_test = _rb_test

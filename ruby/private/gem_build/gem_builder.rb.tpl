@@ -23,7 +23,11 @@ end
 
 Dir.mktmpdir do |tmpdir|
   inputs.each do |src, dst|
-    dst = File.join(tmpdir, dst)
+    if src == gemspec_path or src.end_with?('_gem_builder.rb')
+      dst = File.join(tmpdir, dst)
+    else
+      dst = File.join(tmpdir, 'lib', dst)
+    end
     FileUtils.mkdir_p(File.dirname(dst))
     FileUtils.cp(src, dst)
   end

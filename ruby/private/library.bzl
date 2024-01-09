@@ -26,6 +26,10 @@ ATTRS = {
         default = {},
         doc = "List of bundle environment variables to set when building the library.",
     ),
+    "includes": attr.string_list(
+        default = [],
+        doc = "List of directories to add to the Ruby load path.",
+    ),
 }
 
 def _rb_library_impl(ctx):

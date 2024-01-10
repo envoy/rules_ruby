@@ -15,7 +15,6 @@ def _rb_gem_build_impl(ctx):
     windows_constraint = ctx.attr._windows_constraint[platform_common.ConstraintValueInfo]
     is_windows = ctx.target_platform_has_constraint(windows_constraint)
     tools = depset([])
-    version = ctx.var.get("version", "0.0.0")
 
     gem_builder = ctx.actions.declare_file("{}_gem_builder.rb".format(ctx.label.name))
     transitive_data = get_transitive_data(ctx.files.data, ctx.attr.deps).to_list()
@@ -40,7 +39,7 @@ def _rb_gem_build_impl(ctx):
     #     "rb/Gemfile": "rb/Gemfile",
     #     "bazel-out/darwin_arm64-fastbuild/bin/rb/LICENSE": "rb/LICENSE",
     #   }
-    inputs = transitive_data + transitive_srcs + [gem_builder] + [ctx.file.gemspec]
+    inputs = transitive_data + transitive_srcs + [gem_builder] + [ctx.file.gemspec] + [ctx.file.version_file]
     inputs_manifest = {}
     for src in inputs:
         inputs_manifest[src.path] = src.short_path
@@ -53,7 +52,7 @@ def _rb_gem_build_impl(ctx):
             "{gem_filename}": ctx.outputs.gem.basename,
             "{gemspec}": ctx.file.gemspec.path,
             "{inputs_manifest}": json.encode(inputs_manifest),
-            "{version}": version,
+            "{version_file}": ctx.file.version_file.path,
         },
     )
 
@@ -86,6 +85,11 @@ rb_gem_build = rule(
             allow_single_file = [".gemspec"],
             mandatory = True,
             doc = "Gemspec file to use for gem building.",
+        ),
+        version_file = attr.label(
+            allow_single_file = True,
+            mandatory = True,
+            doc = "Version file to use for building the Gemspec.",
         ),
         _gem_builder_tpl = attr.label(
             allow_single_file = True,
